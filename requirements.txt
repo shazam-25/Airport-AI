@@ -1,0 +1,17 @@
+ultralytics
+opencv-python
+numpy
+scipy
+streamlit
+pandas
+matplotlib
+shapely
+sqlalchemy
+redis
+psycopg2-binary
+pillow
+torch
+torchvision
+supervision
+tqdm
+PyYAML
