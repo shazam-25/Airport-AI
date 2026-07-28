@@ -119,7 +119,8 @@ class CameraPipeline:
                 self.alert_manager.create_alert(stream, event)
         
         elapsed = timer.stop()
-        if self.profiler.record("storage_alerts", elapsed)
+        if self.profiler:
+            self.profiler.record("storage_alerts", elapsed)
         
         # ===================
         # Visualization

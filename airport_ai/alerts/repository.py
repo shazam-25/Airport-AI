@@ -1,6 +1,6 @@
 from airport_ai.alerts.models import Alert
 
-class AirportRepository:
+class AlertRepository:
     def __init__(self, database):
         self.database = database
     

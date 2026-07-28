@@ -2,17 +2,17 @@
 # Cameras
 # =====================
 cameras:
-  - camera_id: GATE_A01
-    name: Gate A01
-    source: Airport-AI/data/videos/01_sample.mp4
+  - camera_id: "GATE_A01"
+    camera_name: "Gate A01"
+    source: "Airport-AI/data/videos/01_sample.mp4"
 
-  - camera_id: GATE_B03
-    name: Gate B03
-    source: Airport-AI/data/videos/02_sample.mp4
+  - camera_id: "GATE_B03"
+    camera_name: "Gate B03"
+    source: "Airport-AI/data/videos/02_sample.mp4"
 
-  - camera_id: GATE_C04
-    name: Gate C04
-    source: Airport-AI/data/videos/03_sample.mp4
+  - camera_id: "GATE_C04"
+    camera_name: "Gate C04"
+    source: "Airport-AI/data/videos/03_sample.mp4"
 
 # =====================
 # YOLO Model
@@ -30,6 +30,7 @@ model:
 # Tracking
 # =====================
 tracking:
+  model_path: "models/yolov8n.pt"
   tracker: bytetrack.yaml
   max_age: 30
   min_hits: 3

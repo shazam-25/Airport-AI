@@ -11,7 +11,7 @@ class Timer:
         self.start_time = perf_counter()
 
     def stop(self):
-        if self._start is None:
+        if self.start_time is None:
             return 0
         elapsed = perf_counter() - self.start_time
         self.start_time = None

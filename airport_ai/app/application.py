@@ -6,7 +6,7 @@ class AirportAIApplication:
         """
         Starts all camera pipelines.
         """
-        print(f"Starting {len(self.pipelines)} cameras")
+        print(f"Starting {len(self.pipelines)} camera(s)")
         while True:
             for pipeline in self.pipelines:
                 frame =  pipeline.process_frame()

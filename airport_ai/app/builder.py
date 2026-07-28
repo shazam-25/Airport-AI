@@ -1,7 +1,8 @@
 from airport_ai.app.application import AirportAIApplication
 from airport_ai.app.services import SharedServices
 from airport_ai.pipeline.camera_pipeline import CameraPipeline
-from airport_air.streams.buffer import FrameBuffer
+from airport_ai.config.camera import CameraConfig
+from airport_ai.streams.buffer import FrameBuffer
 
 class ApplicationBuilder:
     def __init__(self, config):
@@ -13,7 +14,7 @@ class ApplicationBuilder:
         """
         services = self.create_services()
         pipelines = self.create_camera_pipelines(services)
-        return AirportAIApplication(pipeline=pipelines)
+        return AirportAIApplication(pipelines=pipelines)
 
     def create_services(self):
         # ==============
@@ -58,6 +59,15 @@ class ApplicationBuilder:
             device=model_config["device"],
         )
 
+        # ====================
+        # Tracker
+        # ====================
+        from airport_ai.tracking.tracker import ObjectTracker
+
+        tracker_factory = lambda: ObjectTracker(
+            model_path=self.config.get("tracking")["model_path"]
+        )
+
         # =====================
         # Visualizer
         # =====================
@@ -76,10 +86,9 @@ class ApplicationBuilder:
         # ===============
         # Factories
         # ===============
-        from airport_ai.tracking.factory import trackerFactory
-        from airport_ai.decision.turnaround.factory import TurnaroundFactory
-        from airport_ai.decision.ppe.factory import PPEFactory
-        from airport_ai.decision.fod.factory import FODFactory
+        from airport_ai.decision.turnaround.evaluator import TurnaroundEvaluator
+        from airport_ai.decision.ppe.evaluator import PPEEvaluator
+        from airport_ai.decision.fod.evaluator import FODEvaluator
 
         return SharedServices(
             database=database,
@@ -88,30 +97,44 @@ class ApplicationBuilder:
             alert_manager=alert_manager,
             visualizer=visualizer,
             inference_engine=inference_engine,
-            tracker_factory=TrackerFactory(),
-            turnaround_factory=TurnaroundFactory(),
-            ppe_factory=PPEFactory(),
-            fod_factory=FODFactory(),
+            tracker_factory=tracker_factory,
+            turnaround_factory=lambda camera_id: TurnaroundEvaluator(
+                camera_id=camera_id
+            ),
+            ppe_factory=lambda camera_id: PPEEvaluator(
+                camera_id=camera_id
+            ),
+            fod_factory=lambda camera_id: FODEvaluator(
+                camera_id=camera_id
+            ),
             profiler=profiler,
         )
     
     def create_camera_pipelines(self, services):
         pipelines = []
-        cameras = self.config.get("cameras")
-        for camera in cameras:
+        camera_configs = [
+            CameraConfig(camera) for camera in self.config.get("cameras")
+        ]
+        for camera_config in camera_configs:
             buffer = FrameBuffer(camera_config.source)
             pipeline = CameraPipeline(
                 camera_config=camera_config,
                 frame_buffer=buffer,
                 inference_engine=services.inference_engine,
-                tracker=services.tracker_factory.create(),
-                turnaround=services.turnaround_factory.create(),
-                ppe=services.ppe_factory.create(),
-                fod=services.fod_factory.create(),
+                tracker=services.tracker_factory(),
+                turnaround=services.turnaround_factory(
+                    camera_config.camera_id
+                ),
+                ppe=services.ppe_factory(
+                    camera_config.camera_id
+                ),
+                fod=services.fod_factory(
+                    camera_config.camera_id
+                ),
                 repository=services.repository,
                 alert_manager=services.alert_manager,
                 visualizer=services.visualizer,
                 profiler=services.profiler
             )
             pipelines.append(pipeline)
-        return pipeline
+        return pipelines
