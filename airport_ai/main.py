@@ -1,6 +1,4 @@
-from config.settings import *
+from airport_ai.app.runner import main
 
-print("Project Root")
-print(PROJECT_ROOT)
-print("Output")
-print(OUTPUT_DIR)
+if __name__ == "__main__":
+    main()

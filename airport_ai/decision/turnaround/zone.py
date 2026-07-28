@@ -1,3 +1,4 @@
+from airport_ai.config import config
 from airport_ai.decision.turnaround.structures import SafetyZone
 
 class SafetyZoneGenerator:
@@ -5,9 +6,13 @@ class SafetyZoneGenerator:
     Generates a configurable safety zone
     around the selected aircraft.
     """
-    def __init__(self, margin_x, margin_y):
-        self.margin_x = margin_x
-        self.margin_y = margin_y
+    def __init__(self):
+        turnaround_config = config.get("turnaround")
+        zone_config = turnaround_config["safety_zone"]
+        self.margin_x = zone_config["aircraft_margin_x"]
+        self.margin_y = zone_config["aircraft)margin_y"]
+        # self.margin_x = margin_x
+        # self.margin_y = margin_y
     
     def generate(self, aircraft):
         x1 = aircraft.x1 - self.margin_x

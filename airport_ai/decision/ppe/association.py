@@ -1,3 +1,4 @@
+from airport_ai.config import config
 from airport_ai.decision.ppe.structures import PPEStatus
 
 class PPEAssociation:
@@ -28,7 +29,7 @@ class PPEAssociation:
     def __init__(self):
         self.vest_classes = {"safety_vest", "vest"}
         self.ear_classes = {"ear_protection", "earmuff"}
-        self.threshold = 0.05
+        self.threshold =  config.get("ppe")["association"]["overlap_threshold"]
 
     def associate_person(self, person, tracked_objects): # Associate one person
         status = PPEStatus(person=person)

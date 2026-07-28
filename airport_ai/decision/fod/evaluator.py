@@ -1,10 +1,11 @@
 from datetime import datetime
+from airport_ai.config import config
 from airport_ai.decision.fod.structures import FODEvent
 
 class FODEvaluator:
-    def __init__(self, camera_id, stationary_threshold):
+    def __init__(self, camera_id):
         self.camera_id = camera_id
-        self.stationary_threshold = stationary_threshold
+        self.stationary_threshold = config.get("fod")["stationary_seconds"]
 
     def evaluate(self, statuses):
         events = []

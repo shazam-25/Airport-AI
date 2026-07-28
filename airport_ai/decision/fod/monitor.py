@@ -1,14 +1,15 @@
 import math
 import time
 
+from airport_ai.config import config
 from airport_ai.decision.fod.structures import FODStatus
 
 class StationaryMonitor:
     """
     Tracks stationary time for candidate objects.
     """
-    def __init__(self, movement_threshold=10.0):
-        self.movement_threshold = movement_threshold
+    def __init__(self):
+        self.movement_threshold = config.get("fod")["movement_threshold"]
         self.history = {}
 
     def update(self, obj):

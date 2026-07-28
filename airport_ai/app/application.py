@@ -23,3 +23,9 @@ class AirportAIApplication:
         """
         for pipeline in self.pipelines:
             pipeline.buffer.release()
+
+    def get_metrics(self):
+        results = []
+        for pipeline in self.pipelines:
+            results.append(pipeline.metrics.health())
+        return results

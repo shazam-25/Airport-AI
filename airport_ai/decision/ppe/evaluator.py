@@ -1,11 +1,14 @@
 from datetime import datetime
+from airport_ai.config import config
 from airport_ai.decision.ppe.structures import PPEEvent
 
 class PPEEvaluator:
-    def __init__(self, camera_id, require_safety_vest=True, require_ear_protection=True):
+    def __init__(self, camera_id):
         self.camera_id = camera_id
-        self.require_safety_vest = require_safety_vest
-        self.require_ear_protection = require_ear_protection
+        ppe_config = config.get("ppe")
+        rules = ppe_config["required"]
+        self.require_safety_vest = rules["safety_vest"]
+        self.require_ear_protection = rules["ear_protection"]
 
     def check_safety_vest(self, status): # Safety Vest Rule
         if self.require_safety_vest and not status.safety_vest:

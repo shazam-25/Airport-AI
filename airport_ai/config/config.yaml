@@ -1,0 +1,82 @@
+# =====================
+# Cameras
+# =====================
+cameras:
+  - camera_id: GATE_A01
+    name: Gate A01
+    source: Airport-AI/data/videos/01_sample.mp4
+
+  - camera_id: GATE_B03
+    name: Gate B03
+    source: Airport-AI/data/videos/02_sample.mp4
+
+  - camera_id: GATE_C04
+    name: Gate C04
+    source: Airport-AI/data/videos/03_sample.mp4
+
+# =====================
+# YOLO Model
+# =====================
+model:
+  path: "models/yolov8n.pt"
+  confidence: 0.35
+  device: "auto"
+  image_size: 640
+  half_precision: true
+  warmup: true
+  batch_size: 1
+
+# =====================
+# Tracking
+# =====================
+tracking:
+  tracker: bytetrack.yaml
+  max_age: 30
+  min_hits: 3
+
+# =====================
+# Turnaround Safety
+# =====================
+turnaround:
+  safety_zone:
+    aircraft_margin_x: 80
+    aircraft_margin_y: 80
+  person_violation: true
+  vehicle_violation: true
+
+# =====================
+# PPE Rules
+# =====================
+ppe:
+  required:
+    safety_vest: true
+    ear_protection: true
+  association:
+    overlap_threshold: 0.3
+
+# =====================
+# FOD Rules
+# =====================
+fod:
+  stationary_seconds: 60
+  movement_threshold: 10
+
+# =====================
+# Storage
+# =====================
+database:
+  path: Airport-AI/database/airport_monitor.db
+
+# =====================
+# Dashboard
+# =====================
+dashboard:
+  refresh_seconds: 2
+
+# =====================
+# Performance Profiler
+# =====================
+performance:
+  profiling:
+    enabled: true # Collect metrics
+  summary_interval: 100 # Print every 100 frames
