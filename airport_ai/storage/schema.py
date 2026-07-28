@@ -8,6 +8,7 @@ class DatabaseSchema:
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS events(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        camera_id TEXT,
         timestamp TEXT NOT NULL,
         stream TEXT NOT NULL,
         track_id INTEGER,

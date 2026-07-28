@@ -1,3 +1,4 @@
 data
 models
 database
+__pycache__/

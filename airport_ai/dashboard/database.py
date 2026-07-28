@@ -6,5 +6,5 @@ class DashboardDatabase:
         database = Database(database_path)
         self.repository = EventRepository(database)
     
-    def recent_events(self, limit=100):
-        return self.repository.get_recent(limit)
+    def recent_events(self, camera_id, limit=100):
+        return self.repository.get_recent(camera_id, limit)

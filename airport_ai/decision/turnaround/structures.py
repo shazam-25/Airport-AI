@@ -7,6 +7,7 @@ class SafetyEvent:
     Represents one turnaround safety event.
     """
     timestamp: datetime
+    camera_id: str
     track_id: int
     object_type: str
     event_type: str

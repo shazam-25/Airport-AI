@@ -9,6 +9,7 @@ class FODEvent:
     Represents one FOD Detection event.
     """
     timestamp: datetime
+    camera_id: str
     track_id: int
     object_type: str
     event_type: str

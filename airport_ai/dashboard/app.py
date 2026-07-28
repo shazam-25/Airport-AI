@@ -1,6 +1,6 @@
 import streamlit as st
 
-from airport_ai.config.settings import DATABASE_PATH
+from airport_ai.config.settings import DATABASE_PATH, CAMERAS
 from airport_ai.dashboard.components import DashboardComponents
 from airport_ai.dashboard.database import DashboardDatabase
 
@@ -14,7 +14,12 @@ st.title("Airport AI Monitoring Dashboard")
 database = DashboardDatabase(DATABASE_PATH)
 components = DashboardComponents()
 
-events = database.recent_events()
+camera = st.sidebar.selectbox(
+    "Camera",
+    ["All"]+[c["camera_id"] for c in CAMERAS]
+)
+
+events = database.recent_events(camera_id=None if camera=="All" else camera)
 
 components.summary_cards(events)
 

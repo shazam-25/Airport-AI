@@ -30,3 +30,22 @@ FOD_STATIONARY_SECONDS = 30
 
 # Database
 DATABASE_PATH = PROJECT_ROOT / "database/airport_monitor.db"
+
+# Multi-Camera Support
+CAMERAS = [
+    {
+        "camera_id": "GATE_A01",
+        "name": "Gate A01",
+        "source": str(VIDEO_DIR / "01_sample.mp4")
+    },
+    {
+        "camera_id": "GATE_B03",
+        "name": "Gate B03",
+        "source": str(VIDEO_DIR/"02_sample.mp4")
+    },
+    {
+        "camera_id": "GATE_D05",
+        "name": "Gate D05",
+        "source": str(VIDEO_DIR/"03_sampel.mp4")
+    }
+]

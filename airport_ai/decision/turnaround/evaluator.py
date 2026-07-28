@@ -2,7 +2,8 @@ from datetime import datetime
 from airport_ai.decision.turnaround.structures import SafetyEvent
 
 class TurnaroundEvaluator:
-    def __init__(self):
+    def __init__(self, camera_id):
+        self.camera_id = camera_id
         self.person_classes = {"person"}
         self.vehicle_classes = {"truck", "bus", "fuel_truck", "pushback_tug", "catering_truck", "baggage_cart"}
         self.equipment_classes = {"cone", "ladder", "toolbox", "container"}
@@ -17,6 +18,7 @@ class TurnaroundEvaluator:
     def evaluate_person(self, obj): # Person Rule
         return SafetyEvent(
             timestamp=datetime.now(),
+            camera_id=self.camera_id,
             track_id=obj.track_id,
             object_type=obj.class_name,
             event_type="Safety Zone Violation",
@@ -27,6 +29,7 @@ class TurnaroundEvaluator:
     def evaluate_vehicle(self, obj): # Vehicle Rule
         return SafetyEvent(
             timestamp=datetime.now(),
+            camera_id=self.camera_id,
             track_id=obj.track_id,
             object_type=obj.class_name,
             event_type="Vehicle Zone Violation",
@@ -37,6 +40,7 @@ class TurnaroundEvaluator:
     def evaluate_equipment(self, obj):  # Equipment rule
         return SafetyEvent(
             timestamp=datetime.now(),
+            camera_id=self.camera_id,
             track_id=obj.track_id,
             object_type=obj.class_name,
             event_type="Equipment Zone Violation",

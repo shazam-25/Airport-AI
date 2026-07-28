@@ -2,7 +2,8 @@ from datetime import datetime
 from airport_ai.decision.fod.structures import FODEvent
 
 class FODEvaluator:
-    def __init__(self, stationary_threshold):
+    def __init__(self, camera_id, stationary_threshold):
+        self.camera_id = camera_id
         self.stationary_threshold = stationary_threshold
 
     def evaluate(self, statuses):
@@ -13,6 +14,7 @@ class FODEvaluator:
                 events.append(
                     FODEvent(
                         timestamp=datetime.now(),
+                        camera_id=self.camera_id,
                         track_id=status.object.track_id,
                         object_type=status.object.class_name,
                         event_type="Foreign Object Debris",

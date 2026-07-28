@@ -2,13 +2,14 @@ class EventRepository:
     def __init__(self, database):
         self.database = database
     
-    def save(self, stream, event):
+    def save(self, camera_id, stream, event):
         connection = self.database.connect()
         cursor = connection.cursor()
 
         cursor.execute(
             """
             INSERT INTO events(
+                camera_id,
                 timestamp,
                 stream,
                 track_id,
@@ -17,9 +18,10 @@ class EventRepository:
                 severity,
                 message
             )
-            VALUES(?, ?, ?, ?, ?, ?, ?)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
+                camera_id,
                 event.timestamp.isoformat(),
                 stream,
                 event.track_id,
@@ -32,25 +34,46 @@ class EventRepository:
         connection.commit()
         connection.close()
 
-    def get_recent(self, limit=100): # Retrieve Recent Events
+    def get_recent(self, camera_id=None, limit=100): # Retrieve Recent Events
         connection = self.database.connect()
         cursor = connection.cursor()
-        cursor.execute(
-            """
-            SELECT
-                timestamp,
-                stream,
-                track_id,
-                object_type,
-                event_type,
-                severity,
-                message
-            FROM events
-            ORDER BY id DESC
-            LIMIT ?
-            """,
-            (limit,),
-        )
+        if camera_id is None:
+            cursor.execute(
+                """
+                SELECT 
+                    camera_id,
+                    timestamp,
+                    stream,
+                    track_id,
+                    object_type,
+                    event_type,
+                    severity,
+                    message
+                FROM events
+                ORDER BY id DESC
+                LIMIT ?
+                """,
+                (limit,),
+            )
+        else:
+            cursor.execute(
+                """
+                SELECT 
+                    camera_id,
+                    timestamp,
+                    stream,
+                    track_id,
+                    object_type,
+                    event_type,
+                    severity,
+                    message
+                FROM events
+                WHERE camera_id = ?
+                ORDER BY id DESC
+                LIMIT ?
+                """,
+                (camera_id, limit,),
+            )
         rows = cursor.fetchall()
         connection.close()
         return rows

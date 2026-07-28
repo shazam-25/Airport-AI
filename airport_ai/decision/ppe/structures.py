@@ -8,6 +8,7 @@ class PPEEvent:
     Represents one PPE compliance event.
     """
     timestamp: datetime
+    camera_id: str
     track_id: int
     object_type: str
     event_type: str

@@ -2,7 +2,8 @@ from datetime import datetime
 from airport_ai.decision.ppe.structures import PPEEvent
 
 class PPEEvaluator:
-    def __init__(self, require_safety_vest=True, require_ear_protection=True):
+    def __init__(self, camera_id, require_safety_vest=True, require_ear_protection=True):
+        self.camera_id = camera_id
         self.require_safety_vest = require_safety_vest
         self.require_ear_protection = require_ear_protection
 
@@ -10,6 +11,7 @@ class PPEEvaluator:
         if self.require_safety_vest and not status.safety_vest:
             return PPEEvent(
                 timestamp=datetime.now(),
+                camera_id=self.camera_id,
                 track_id=status.person.track_id,
                 object_type="person",
                 event_type="Safety Vest Missing",
@@ -22,6 +24,7 @@ class PPEEvaluator:
         if self.require_ear_protection and not status.ear_protection:
             return PPEEvent(
                 timestamp=datetime.now(),
+                camera_id=self.camera_id,
                 track_id=status.person.track_id,
                 object_type="person",
                 event_type="Ear Protection Missing",

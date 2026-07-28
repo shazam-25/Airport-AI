@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-class DashboardComponents:
+class DashboardComponents: ## Doubtful
     def summary_cards(self, events):
         turnaround = sum(
             row[1] == 'TURNAROUND' for row in events
@@ -22,6 +22,7 @@ class DashboardComponents:
         df = pd.DataFrame(
             events,
             columns = [
+                "Camera",
                 "Timestamp",
                 "Stream",
                 "Track ID",
