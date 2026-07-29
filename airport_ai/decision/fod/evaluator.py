@@ -38,10 +38,8 @@ class FODEvaluator:
                 )
         return events
     
-    # CHANGE LATER keep classes according to YOLO classes
+    # CHANGE LATER keep classes according to YOLO classes -- CHANGED
     def is_fod_candidate(self, obj):
         return obj.class_id in [
-            2,
-            3,
-            5
+            14, 15, 16, 17
         ]

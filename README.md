@@ -30,7 +30,7 @@ Airport-AI
 |       |- database.py
 |       |- video.py
 |   |- decision "READY"
-|       |- fod -> (LATER CHANGE) evaluator classes
+|       |- fod -> (LATER CHANGE) evaluator classes changed
 |           |- __init__.py
 |           |- evaluator.py -> FODEvaluator -> return FODEvent (s)
 |           |- monitor.py -- NOT REQUIRED
@@ -93,5 +93,5 @@ Airport-AI
 |       |- overlay_cache.py
 |       |- visualizer.py
 |- tools
-|       |- extract_frames.py
-|       |- train_aiport.py
+|   |- extract_frames.py
+|   |- train_aiport.py

@@ -3,3 +3,4 @@ models
 database
 __pycache__/
 datasets
+cvat

@@ -37,8 +37,8 @@ for video_name in videos:
     while True:
         ret, frame = cap.read()
         if not ret: break
-        # Extracts every 5th frame
-        if frame_id % 5 == 0:
+        # Extracts every 10th frame
+        if frame_id % 10 == 0:
             filename = (
                 f"{video_path.stem}_"
                 f"{video_count:06d}.jpg"
