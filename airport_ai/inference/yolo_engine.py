@@ -1,5 +1,6 @@
 from ultralytics import YOLO
 import torch
+from airport_ai.inference.detection import Detection
 
 class YOLOEngine:
     def __init__(
@@ -30,7 +31,7 @@ class YOLOEngine:
         # FP16
         # ================
         self.half = (
-            half_precision and self.device != "cpu"
+            half_precision and self.device.startswith("cuda")
         )
 
         # ==============
@@ -54,11 +55,18 @@ class YOLOEngine:
                 3,
                 self.image_size,
                 self.image_size
-            )
+            ), device=self.device
         )
         dummy = dummy.to(self.device)
 
-        self.model.predict(dummy, imgsz=self.image_size, verbose=False)
+        self.model.predict(
+                dummy, 
+                imgsz=self.image_size, 
+                device=self.device,
+                half=self.half,
+                verbose=False
+        )
+            
 
     def detect(self, frame):
         results = self.model.predict(
@@ -78,8 +86,8 @@ class YOLOEngine:
             for box in boxes:
                 detections.append(
                     Detection(
-                        class_id=int(box.cls[0]),
-                        confidence=float(box.conf[0]),
+                        class_id=int(box.cls.cpu().item()),
+                        confidence=float(box.cls.cpu().item()),
                         bbox=box.xyxy[0].cpu().tolist()
                     )
                 )
