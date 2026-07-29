@@ -1,30 +1,44 @@
-from datetime import datetime
 from airport_ai.config import config
-from airport_ai.decision.fod.structures import FODEvent
+import time
+from typing import List
+from airport_ai.events.fod_event import FODEvent
+from airport_ai.inference.tracked_object import TrackedObject
 
 class FODEvaluator:
     def __init__(self, camera_id):
         self.camera_id = camera_id
+        self.history = {}
         self.stationary_threshold = config.get("fod")["stationary_seconds"]
 
-    def evaluate(self, statuses):
+    def evaluate(self, tracks: List[TrackedObject]):
         events = []
-        for status in statuses:
-            if status.stationary_seconds >= self.stationary_threshold:
-                status.is_fod = True
+        now = time.time()
+        for obj in tracks:
+            if not self.is_fod_candidate(obj):
+                continue
+            previous = self.history.get(obj.track_id)
+            if previous is None:
+                self.history[obj.track_id] = {
+                    "center": obj.center,
+                    "time": now
+                }
+                continue
+            elapsed = (now - previous["time"])
+            if elapsed > self.stationary_threshold:
                 events.append(
                     FODEvent(
-                        timestamp=datetime.now(),
                         camera_id=self.camera_id,
-                        track_id=status.object.track_id,
-                        object_type=status.object.class_name,
-                        event_type="Foreign Object Debris",
-                        severity="HIGH",
-                        message=(
-                            f"{status.object.class_name} "
-                            f"(ID {status.object.track_id}) has remained "
-                            f"stationary for "
-                            f"{status.stationary_seconds:.1f} seconds"
-                        )
+                        track_id=obj.track_id,
+                        event_type="STATIONARY_FOD",
+                        severity="MEDIUM"
                     )
                 )
+        return events
+    
+    # CHANGE LATER keep classes according to YOLO classes
+    def is_fod_candidate(self, obj):
+        return obj.class_id in [
+            2,
+            3,
+            5
+        ]
