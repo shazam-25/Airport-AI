@@ -30,7 +30,7 @@ model:
 # Tracking
 # =====================
 tracking:
-  model_path: "models/yolov8n.pt"
+  model_path: "Airport-AI/models/yolov8n.pt"
   tracker: "bytetrack.yaml"
   max_age: 30
   min_hits: 3

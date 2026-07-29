@@ -24,7 +24,7 @@ class CameraPipeline:
     ):
         self.camera_id = camera_config.camera_id
         self.camera_name = camera_config.camera_name
-        self.source = camera_config.source
+        # self.source = camera_config.source
 
         self.camera = frame_buffer
         self.inference_engine = inference_engine
@@ -46,7 +46,7 @@ class CameraPipeline:
 
         self.frame_skip = config.get("processing")["frame_skip"]
 
-        self.frame_count = 0
+        # self.frame_count = 0
         self.frame_index = 0
 
         self.processed_frames = 0
@@ -177,10 +177,10 @@ class CameraPipeline:
         # ===================
         total_time = pipeline_timer.stop()
         self.metrics.update_frame(total_time)
-        self.frame_count += 1
+        # self.frame_count += 1
         self.processed_frames += 1
 
-        if (self.profiler and self.frame_count % config.get("performance")["summary_interval"] == 0):
+        if (self.profiler and self.processed_frames % config.get("performance")["summary_interval"] == 0):
             print("\n====== PERFORMANCE REPORT ======")
             report = self.profiler.summary()
             for stage, values in report.items():

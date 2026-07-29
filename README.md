@@ -92,3 +92,6 @@ Airport-AI
 |       |- draw_utils.py_
 |       |- overlay_cache.py
 |       |- visualizer.py
+|- tools
+|       |- extract_frames.py
+|       |- train_aiport.py

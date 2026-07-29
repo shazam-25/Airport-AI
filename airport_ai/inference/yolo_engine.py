@@ -11,11 +11,11 @@ class YOLOEngine:
         image_size=640,
         half_precision=True,
         warmup=True,
-        batch_size=1,
+        # batch_size=1,
     ):
         self.confidence = confidence
         self.image_size = image_size
-        self.batch_size = batch_size
+        # self.batch_size = batch_size
 
         # ===================
         # Device Selection
