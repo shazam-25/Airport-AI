@@ -1,12 +1,19 @@
 from airport_ai.alerts.models import Alert
+from datetime import datetime
 
 class AlertRepository:
     def __init__(self, database):
         self.database = database
     
     def save(self, alert: Alert):
-        conn = self.database.connet()
+        conn = self.database.connect()
         cur = conn.cursor()
+
+        # Accept both datetime and ISO string
+        if isinstance(alert.timestamp, datetime):
+            timestamp = alert.timestamp.isoformat()
+        else:
+            timestamp = str(alert.timestamp)
 
         cur.execute(
             """

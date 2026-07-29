@@ -5,6 +5,7 @@ from airport_ai.inference.tracked_object import TrackedObject
 from airport_ai.events.ppe_event import PPEEvent
 
 from .association import PPEAssociation
+from datetime import datetime
 
 class PPEEvaluator:
     def __init__(self, camera_id):
@@ -54,6 +55,8 @@ class PPEEvaluator:
                         track_id=status.track_id,
                         event_type="MISSING_SAFETY_VEST",
                         severity="MEDIUM",
+                        message=f"Worker {status.person.track_id} is not wearing safety vest.",
+                        timestamp=datetime.utcnow(),
                     )
                 )
             if (self.rules["ear_protection_required"] and not status.ear_protection):
@@ -61,8 +64,10 @@ class PPEEvaluator:
                     PPEEvent(
                         camera_id=self.camera_id,
                         track_id=status.track_id,
-                        event_type="MISSING_SAFETY_VEST",
+                        event_type="MISSING_EAR_PROTECTION",
                         severity="MEDIUM",
+                        message=f"Worker {status.person.track_id} is not wearing ear protection.",
+                        timestamp=datetime.timezone.utc,
                     )
                 )
         return events

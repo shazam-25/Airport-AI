@@ -4,15 +4,15 @@
 cameras:
   - camera_id: "GATE_A01"
     camera_name: "Gate A01"
-    source: "Airport-AI/data/videos/01_sample.mp4"
+    source: "data/videos/04_sample.mp4"
 
   - camera_id: "GATE_B03"
     camera_name: "Gate B03"
-    source: "Airport-AI/data/videos/02_sample.mp4"
+    source: "data/videos/02_sample.mp4"
 
   - camera_id: "GATE_C04"
     camera_name: "Gate C04"
-    source: "Airport-AI/data/videos/03_sample.mp4"
+    source: "data/videos/03_sample.mp4"
 
 # =====================
 # YOLO Model
@@ -31,7 +31,7 @@ model:
 # =====================
 tracking:
   model_path: "models/yolov8n.pt"
-  tracker: bytetrack.yaml
+  tracker: "bytetrack.yaml"
   max_age: 30
   min_hits: 3
 
@@ -66,7 +66,7 @@ fod:
 # Storage
 # =====================
 database:
-  path: Airport-AI/database/airport_monitor.db
+  path: "data/database/airport_monitor.db"
 
 # =====================
 # Dashboard
@@ -81,3 +81,22 @@ performance:
   profiling:
     enabled: true # Collect metrics
   summary_interval: 100 # Print every 100 frames
+
+# ====================
+# Frame Processing
+# ====================
+processing:
+  frame_skip: 1
+  duplicate_threshold: 0.99
+  max_queue_size: 30
+
+# ====================
+# Visualization
+# ====================
+visualization:
+  enabled: true
+  render_every: 2
+  draw_confidence: true
+  draw_track_ids: true
+  draw_fps: true
+  cache_statis_overlay: true

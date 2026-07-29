@@ -34,6 +34,45 @@ class EventRepository:
         connection.commit()
         connection.close()
 
+    def save_batch(self, batch):
+        connection = self.database.connect()
+        cursor = connection.cursor()
+
+        rows = []
+
+        for camera_id, stream, event in batch:
+            rows.append(
+                (
+                    camera_id,
+                    event.timestamp,
+                    stream,
+                    event.track_id,
+                    event.object_type,
+                    event.event_type,
+                    event.severity,
+                    event.message,
+                )
+            )
+        
+        cursor.executemany(
+            """
+            INSERT INTO events(
+                camera_id,
+                timestamp,
+                stream,
+                track_id,
+                object_type,
+                event_type,
+                severity,
+                message
+            )
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            rows,
+        )
+        connection.commit()
+        connection.close()
+
     def get_recent(self, camera_id=None, limit=100): # Retrieve Recent Events
         connection = self.database.connect()
         cursor = connection.cursor()
@@ -77,3 +116,5 @@ class EventRepository:
         rows = cursor.fetchall()
         connection.close()
         return rows
+
+    

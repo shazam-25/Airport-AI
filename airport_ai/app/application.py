@@ -29,3 +29,12 @@ class AirportAIApplication:
         for pipeline in self.pipelines:
             results.append(pipeline.metrics.health())
         return results
+
+    def get_processing_stats(self):
+        return [
+            pipeline.processing_stats() for pipeline in self.pipelines
+        ]
+
+    def shutdown(self):
+        for pipeline in self.pipelines:
+            pipeline.analytics_executor.shutdown()

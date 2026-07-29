@@ -51,6 +51,7 @@ class RuntimeMetrics:
             "frames_processed": self.frames_processed,
             "status": self.status()
         }
+    
 
     def status(self):
         fps = self.fps()

@@ -9,6 +9,7 @@ class SharedServices:
     """
     database: object
     repository: object
+    storage_writer: object
     alert_repository: object
     alert_manager: object
     visualizer: object
@@ -17,4 +18,5 @@ class SharedServices:
     turnaround_factory: object
     ppe_factory: object
     fod_factory: object
+    analytics_executor: object
     profiler: object | None = None

@@ -1,11 +1,13 @@
 from airport_ai.config.loader import ConfigLoader
 from airport_ai.config.schemas import validate
-import os
+from pathlib import Path
 
-CONFIG_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "config.yaml"
-)
+# CONFIG_PATH = os.path.join(
+#     os.path.dirname(__file__),
+#     "config.yaml"
+# )
+
+CONFIG_PATH = Path(__file__).parent / "config.yaml"
 
 config = ConfigLoader(CONFIG_PATH)
 

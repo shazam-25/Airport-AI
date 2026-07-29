@@ -2,7 +2,8 @@ from airport_ai.app.application import AirportAIApplication
 from airport_ai.app.services import SharedServices
 from airport_ai.pipeline.camera_pipeline import CameraPipeline
 from airport_ai.config.camera import CameraConfig
-from airport_ai.streams.buffer import FrameBuffer
+from airport_ai.streams.camera import AsyncCamera
+from airport_ai.analytics.executor import AnalyticsExecutor
 
 class ApplicationBuilder:
     def __init__(self, config):
@@ -22,13 +23,16 @@ class ApplicationBuilder:
         # ==============
         from airport_ai.storage.database import Database
         database_config = self.config.get("database")
+        database_path = self.config.resolve_path(database_config["path"])
         database = Database(database_config["path"])
 
-        # =============
-        # Repositories
-        # =============
+        # =================
+        # Event Repository
+        # =================
         from airport_ai.storage.repository import EventRepository
+        from airport_ai.storage.writer import StorageWriter
         repository = EventRepository(database)
+        storage_writer = StorageWriter(repository)
 
         # ================
         # Alert Repository
@@ -64,15 +68,7 @@ class ApplicationBuilder:
         # ====================
         from airport_ai.tracking.tracker import ObjectTracker
 
-        tracker_factory = lambda: ObjectTracker(
-            model_path=self.config.get("tracking")["model_path"]
-        )
-
-        # =====================
-        # Visualizer
-        # =====================
-        from airport_ai.visualization.visualizer import Visualizer
-        visualizer = Visualizer()
+        tracker_factory = lambda: ObjectTracker()
 
         # =================
         # Profiler
@@ -83,6 +79,23 @@ class ApplicationBuilder:
             from airport_ai.performance.profiler import PipelineProfiler
             profiler = PipelineProfiler()
 
+        # =====================
+        # Visualizer
+        # =====================
+        from airport_ai.visualization.visualizer import Visualizer
+        visualization_config = self.config.get("visualization")
+        if visualization_config is None:
+            visualization_config = {}
+        visualizer = Visualizer(
+            config=visualization_config,
+            profiler=profiler,
+        )
+
+        # ================
+        # Analytics
+        # ================
+        analytics_executor = AnalyticsExecutor(max_workers=3)
+
         # ===============
         # Factories
         # ===============
@@ -90,9 +103,11 @@ class ApplicationBuilder:
         from airport_ai.decision.ppe.evaluator import PPEEvaluator
         from airport_ai.decision.fod.evaluator import FODEvaluator
 
+        
         return SharedServices(
             database=database,
             repository=repository,
+            storage_writer=storage_writer,
             alert_repository=alert_repository,
             alert_manager=alert_manager,
             visualizer=visualizer,
@@ -107,6 +122,7 @@ class ApplicationBuilder:
             fod_factory=lambda camera_id: FODEvaluator(
                 camera_id=camera_id
             ),
+            analytics_executor=analytics_executor,
             profiler=profiler,
         )
     
@@ -116,10 +132,11 @@ class ApplicationBuilder:
             CameraConfig(camera) for camera in self.config.get("cameras")
         ]
         for camera_config in camera_configs:
-            buffer = FrameBuffer(camera_config.source)
+            camera = AsyncCamera(source=camera_config.source)
+            camera.start()
             pipeline = CameraPipeline(
                 camera_config=camera_config,
-                frame_buffer=buffer,
+                frame_buffer=camera,
                 inference_engine=services.inference_engine,
                 tracker=services.tracker_factory(),
                 turnaround=services.turnaround_factory(
@@ -132,8 +149,10 @@ class ApplicationBuilder:
                     camera_config.camera_id
                 ),
                 repository=services.repository,
+                storage_writer=services.storage_writer,
                 alert_manager=services.alert_manager,
                 visualizer=services.visualizer,
+                analytics_executor=services.analytics_executor,
                 profiler=services.profiler
             )
             pipelines.append(pipeline)

@@ -6,6 +6,7 @@ from airport_ai.inference.tracked_object import TrackedObject
 from airport_ai.events.safety_event import SafetyEvent
 
 from .zone import SafetyZone
+from datetime import datetime
 
 class TurnaroundEvaluator:
     def __init__(self, camera_id):
@@ -73,9 +74,8 @@ class TurnaroundEvaluator:
                         object_type=self.class_name(obj),
                         event_type="SAFETY_ZONE_INTRUSION",
                         severity="HIGH",
-                        message=(
-                            "Object inside aircraft "
-                            "turnaround safety zone"
+                        message="Equipment {obj.track_id} entered aircraft safety zone.",
+                        timestamp=datetime.timezone.utc,
                         )
                     )
                 )

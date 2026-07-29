@@ -1,5 +1,6 @@
 from airport_ai.config import config
 import time
+from datetime import datetime
 from typing import List
 from airport_ai.events.fod_event import FODEvent
 from airport_ai.inference.tracked_object import TrackedObject
@@ -30,7 +31,9 @@ class FODEvaluator:
                         camera_id=self.camera_id,
                         track_id=obj.track_id,
                         event_type="STATIONARY_FOD",
-                        severity="MEDIUM"
+                        severity="MEDIUM",
+                        message="{obj.track_id} FOD Detected",
+                        timestamp=datetime.utcnow(),
                     )
                 )
         return events

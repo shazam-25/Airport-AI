@@ -1,4 +1,3 @@
-# Ingestion & Buffer Engine.
 import cv2
 import threading
 import queue
@@ -37,7 +36,12 @@ class AsyncCamera:
         while self.running:
             ret, frame = self.source.read()
             if not ret:
-                continue
+                print(
+                "Video ended:",
+                self.source.path
+                )
+                self.running = False
+                break
             frame_count += 1
             if frame_count % self.frame_skip != 0:
                 continue
@@ -45,4 +49,4 @@ class AsyncCamera:
             self.buffer.put(frame)
 
     def read(self):
-        return self.buffer.get()
+        return self.buffer.read()

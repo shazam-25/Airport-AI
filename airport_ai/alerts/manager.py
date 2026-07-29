@@ -6,7 +6,7 @@ class AlertManager:
         self.repository = repository
         self.notifier = notifier
 
-    def creat_alert(self, stream: str, event):
+    def create_alert(self, stream: str, event):
         alert = Alert(
             alert_id=None,
             timestamp=event.timestamp,

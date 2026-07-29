@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime
 
 @dataclass
 class FODEvent:
@@ -9,3 +10,5 @@ class FODEvent:
     track_id: int
     event_type: str
     severity: str
+    message: str
+    timestamp: datetime = field(default_factory=datetime.utcnow)
