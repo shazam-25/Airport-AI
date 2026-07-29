@@ -74,9 +74,8 @@ class TurnaroundEvaluator:
                         object_type=self.class_name(obj),
                         event_type="SAFETY_ZONE_INTRUSION",
                         severity="HIGH",
-                        message="Equipment {obj.track_id} entered aircraft safety zone.",
-                        timestamp=datetime.timezone.utc,
-                        )
+                        message=f"Equipment {obj.track_id} entered aircraft safety zone.",
+                        timestamp=datetime.utcnow(),
                     )
                 )
         return events

@@ -32,7 +32,7 @@ class AlertRepository:
             VALUES(?,?,?,?,?,?,?,?,?,?)
             """,
             (
-                alert.timestamp.isoformat(),
+                timestamp,
                 alert.camera_id,
                 alert.stream,
                 alert.track_id,

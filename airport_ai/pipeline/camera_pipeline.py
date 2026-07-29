@@ -221,5 +221,5 @@ class CameraPipeline:
             "processed_frames": self.processed_frames,
             "skipped_frames": self.skipped_frames,
             "dropped_frames": self.dropped_frames,
-            "queue_size": (self.camera.buffer.size() if hasattr(self.camera, "size") else 0,)
+            "queue_size": (self.camera.size() if hasattr(self.camera, "size") else 0,)
         }

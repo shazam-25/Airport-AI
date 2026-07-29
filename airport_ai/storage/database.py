@@ -24,6 +24,9 @@ class Database:
     def initialize(self):
         connection = self.connect()
         cursor = connection.cursor()
+        # ================
+        # Events
+        # ================
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS events
@@ -37,6 +40,27 @@ class Database:
                 event_type TEXT,
                 severity TEXT,
                 message TEXT
+            )
+            """
+        )
+        # ==========================
+        # Alerts
+        # ==========================
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS alerts
+            (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT NOT NULL,
+                camera_id TEXT NOT NULL,
+                stream TEXT NOT NULL,
+                track_id INTEGER,
+                object_type TEXT,
+                event_type TEXT,
+                severity TEXT,
+                priority TEXT,
+                message TEXT,
+                status TEXT
             )
             """
         )

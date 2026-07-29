@@ -63,7 +63,7 @@ class Visualizer:
     # ===========================
     # Static Drawing
     # ===========================
-    def draw_statis(self, frame):
+    def draw_static(self, frame):
         cv2.putText(
             frame,
             "Aiport AI Monitoring",

@@ -67,7 +67,7 @@ class PPEEvaluator:
                         event_type="MISSING_EAR_PROTECTION",
                         severity="MEDIUM",
                         message=f"Worker {status.person.track_id} is not wearing ear protection.",
-                        timestamp=datetime.timezone.utc,
+                        timestamp=datetime.utcnow(),
                     )
                 )
         return events

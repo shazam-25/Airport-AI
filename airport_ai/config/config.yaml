@@ -86,7 +86,7 @@ performance:
 # Frame Processing
 # ====================
 processing:
-  frame_skip: 1
+  frame_skip: 0
   duplicate_threshold: 0.99
   max_queue_size: 30
 
