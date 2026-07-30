@@ -18,22 +18,33 @@ cameras:
 # YOLO Model
 # =====================
 model:
-  path: "models/yolov8n.pt"
-  confidence: 0.35
+  type: custom  # MODIFICATION
+  path: "runs/train/airport_yolo26n/weights/best.pt" # MODIFICATION
+  confidence: 0.30  # MODIFICATION
   device: "auto"
   image_size: 640
+  iou: 0.45 # MODIFICATION
   half_precision: true
   warmup: true
   batch_size: 1
+  classes:  # MODIFICATION
+    0: aircraft
+    1: airport_tug
+    2: cone
+    3: ground_support_equipment
+    4: safety_vest
+    5: worker
 
 # =====================
 # Tracking
 # =====================
 tracking:
-  model_path: "Airport-AI/models/yolov8n.pt"
   tracker: "bytetrack.yaml"
   max_age: 30
   min_hits: 3
+  iou_threshold: 0.5
+  max_missing_frames: 30
+  enabled_prediction: true
 
 # =====================
 # Turnaround Safety
@@ -67,6 +78,12 @@ fod:
 # =====================
 database:
   path: "data/database/airport_monitor.db"
+
+# ====================
+# Memory Cooldown
+# ====================
+events:
+  cooldown_seconds: 30
 
 # =====================
 # Dashboard

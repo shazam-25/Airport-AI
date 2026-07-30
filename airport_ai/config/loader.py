@@ -19,5 +19,8 @@ class ConfigLoader:
     def resolve_path(self, value):
         path = Path(value)
         if path.is_absolute():
-            return str(path)
-        return str(self.project_root / path)
+            return path.resolve()
+        parts = path.parts
+        if parts and parts[0] == self.project_root.name:
+            path = Path(*parts[1:])
+        return (self.project_root / path).resolve()

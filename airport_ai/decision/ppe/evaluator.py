@@ -13,7 +13,7 @@ class PPEEvaluator:
         self.association = PPEAssociation()
         self.rules = {
             "safety_vest_required": True,
-            "ear_protection_required": True
+            "ear_protection_required": False
         }
 
     # def check_safety_vest(self, status): # Safety Vest Rule
@@ -44,38 +44,48 @@ class PPEEvaluator:
 
     def evaluate(self, tracks: List[TrackedObject]):
         events = []
-        person = [obj for obj in tracks if self.is_person(obj)]
+        workers = [obj for obj in tracks if self.is_worker(obj)]
         ppe_items = [obj for obj in tracks if self.is_ppe(obj)]
-        statuses = self.association.associate(person, ppe_items)
+        statuses = self.association.associate(workers, ppe_items)
         for status in statuses:
             if (self.rules["safety_vest_required"] and not status.safety_vest):
                 events.append(
                     PPEEvent(
+                        timestamp=datetime.utcnow(),
                         camera_id=self.camera_id,
                         track_id=status.track_id,
+                        object_type="worker",
                         event_type="MISSING_SAFETY_VEST",
                         severity="MEDIUM",
-                        message=f"Worker {status.person.track_id} is not wearing safety vest.",
-                        timestamp=datetime.utcnow(),
+                        message=(
+                            f"Worker "
+                            f"{status.track_id} "
+                            "is not wearing safety vest."
+                        ),
                     )
                 )
             if (self.rules["ear_protection_required"] and not status.ear_protection):
                 events.append(
                     PPEEvent(
+                        timestamp=datetime.utcnow(),
                         camera_id=self.camera_id,
                         track_id=status.track_id,
+                        object_type="worker",
                         event_type="MISSING_EAR_PROTECTION",
                         severity="MEDIUM",
-                        message=f"Worker {status.person.track_id} is not wearing ear protection.",
-                        timestamp=datetime.utcnow(),
+                        message=(
+                            f"Worker "
+                            f"{status.track_id} "
+                            "is missing ear protection."
+                        ),
                     )
                 )
         return events
 
     # CHANGE LATER according to YOLO classes (person class id)
-    def is_person(self, obj):
-        return obj.class_id == 13
+    def is_worker(self, obj):
+        return (obj.object_type == "worker")
 
     # CHANGE LATER according to YOLO classes (vest & ear class id)
     def is_ppe(self, obj):
-        return obj.class_id in [14, 15]
+        return (obj.object_type in ["safety_vest"])

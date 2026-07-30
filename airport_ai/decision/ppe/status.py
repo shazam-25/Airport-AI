@@ -21,5 +21,6 @@ class PPEStatus:
     Stores PPE information for one tracked person.
     """
     track_id: int
+    person: str
     safety_vest: bool = False
     ear_protection: bool = False

@@ -117,4 +117,18 @@ class EventRepository:
         connection.close()
         return rows
 
+    # def recent_events(limit=20):
+
+    #     cursor.execute(
+    #         """
+    #         SELECT *
+    #         FROM events
+    #         ORDER BY timestamp DESC
+    #         LIMIT ?
+    #         """,
+    #         (limit,)
+    #     )
+
+    #     return cursor.fetchall()
+
     

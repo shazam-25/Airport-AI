@@ -37,7 +37,7 @@ def draw_label(
     cv2.putText(
         frame,
         text,
-        (x1, max(y1 - 8, 20)),
+        (x1, max(y1 - 5, 15)),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.55,
         color,
@@ -83,7 +83,7 @@ def draw_event(
         text,
         (20, y),
         cv2.FONT_HERSHEY_SIMPLEX,
-        0.65,
+        0.7,
         color,
         2,
         cv2.LINE_AA,

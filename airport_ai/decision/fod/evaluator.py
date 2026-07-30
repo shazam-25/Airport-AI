@@ -10,6 +10,7 @@ class FODEvaluator:
         self.camera_id = camera_id
         self.history = {}
         self.stationary_threshold = config.get("fod")["stationary_seconds"]
+        self.fod_classes = {"cone"}
 
     def evaluate(self, tracks: List[TrackedObject]):
         events = []
@@ -21,25 +22,30 @@ class FODEvaluator:
             if previous is None:
                 self.history[obj.track_id] = {
                     "center": obj.center,
-                    "time": now
+                    "time": now,
+                    "alerted": False
                 }
                 continue
             elapsed = (now - previous["time"])
-            if elapsed > self.stationary_threshold:
+            if elapsed > self.stationary_threshold and not previous["alerted"]:
                 events.append(
                     FODEvent(
                         camera_id=self.camera_id,
                         track_id=obj.track_id,
+                        object_type=obj.object_type,
                         event_type="STATIONARY_FOD",
-                        severity="MEDIUM",
-                        message="{obj.track_id} FOD Detected",
+                        severity="LOW",
+                        message=(
+                            f"{obj.object_type} "
+                            f"{obj.track_id} "
+                            "FOD detected"
+                        ),
                         timestamp=datetime.utcnow(),
                     )
                 )
+                previous["alerted"] = True
         return events
     
     # CHANGE LATER keep classes according to YOLO classes -- CHANGED
-    def is_fod_candidate(self, obj):
-        return obj.class_id in [
-            14, 15, 16, 17
-        ]
+    def is_fod_candidate(self, obj: TrackedObject):
+        return (obj.object_type in self.fod_classes)

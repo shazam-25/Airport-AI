@@ -1,36 +1,59 @@
 import streamlit as st
-from airport_ai.config import config
-from airport_ai.config.settings import DATABASE_PATH, CAMERAS
-from airport_ai.dashboard.components import DashboardComponents
-from airport_ai.dashboard.database import DashboardDatabase
+import cv2
+
+from airport_ai.dashboard.runtime_store import runtime_store
+
 
 st.set_page_config(
-    page_title="Airport AI Monitoring",
-    layout="wide"
+    layout="wide",
+    page_title="Airport AI"
 )
 
-st.title("Airport AI Monitoring Dashboard")
 
-database = DashboardDatabase()
-components = DashboardComponents()
+# @st.cache_resource
+# def get_runtime():
 
-camera = st.sidebar.selectbox(
-    "Camera",
-    ["All"]+[c["camera_id"] for c in CAMERAS]
+#     builder = ApplicationBuilder()
+
+#     application = builder.build()
+
+#     return application.services.runtime_store
+
+
+
+# runtime = get_runtime()
+
+
+st.title(
+    "Airport Ground Operations AI"
 )
 
-events = database.recent_events(camera_id=None if camera=="All" else camera)
 
-components.summary_cards(events) # Display Event Summary Cards
+# Multi-camera support
+camera_ids = list(runtime_store.frames.keys())
+st.write(runtime_store.frames)
 
-st.divider()
+if not camera_ids:
+    st.warning("Waiting for camera pipeline...")
+    st.stop()
 
-st.subheader("Recent Events")
-components.event_table(events)  # Display Events
-
-alerts = database.active_alerts()
-st.metric("Active Alerts", len(alerts)) # Display Alert Counts
-components.active_alerts_table(alerts)  # Display Alerts
+cols = st.columns(len(camera_ids))
 
 
+# # Display metrics
+# metrics = runtime_store.get_metrics()
 
+# if camera in metrics:
+
+#     st.json(metrics[camera])
+
+# # Dsiplay event history
+# events = runtime_store.get_events()
+
+# for event in reversed(events[-20:]):
+
+#     st.write(
+#         f"{event.timestamp} | "
+#         f"{event.event_type} | "
+#         f"{event.severity}"
+#     )

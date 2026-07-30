@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Optional
 
 class OverlayCache:
     def __init__(self):
@@ -13,12 +14,12 @@ class OverlayCache:
 
     # --- Store Overlay ---
     def store(self, overlay, frame_shape):
-        self.overlay = overlay.copy()
+        self.overlay = overlay
         self.frame_shape = frame_shape
         self.cache_misses += 1
 
     # --- Retrieve Overlay ---
-    def get(self):
+    def get(self) -> Optional[np.ndarray]:
         if self.overlay is None:
             return None
         self.cache_hits += 1

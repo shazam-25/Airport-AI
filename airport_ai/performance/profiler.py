@@ -96,7 +96,7 @@ class PipelineProfiler:
             3,
         )
     
-    # --- Pretty COnsole Report ---
+    # --- Pretty Console Report ---
     def print_summary(self):
         report = self.summary()
         print("\n========== PIPELINE PROFILER ==========\n")

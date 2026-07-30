@@ -15,3 +15,5 @@ torchvision
 supervision
 tqdm
 PyYAML
+roboflow
+streamlit-autorefresh

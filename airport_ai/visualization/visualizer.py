@@ -13,6 +13,14 @@ class Visualizer:
         self.previous_tracks = {}
         self.label_cache = {}
         self.render_counter = 0
+        self.class_colors = {
+            "aircraft": (255,255,0),
+            "airport_tug": (0,255,255),
+            "cone": (0,165,255),
+            "ground_support_equipment": (255,0,255),
+            "safety_vest": (0,255,0),
+            "worker": (255,0,0)
+        }
 
     # ========================
     # Main Render Function
@@ -55,10 +63,15 @@ class Visualizer:
             self.cache.store(overlay, frame.shape)
             if self.profiler:
                 self.profiler.visualization_cache_miss()
-            else:
-                if self.profiler:
-                    self.profiler.visualization_cache_hit()
-        return self.cache.get().copy()
+        else:
+            if self.profiler:
+                self.profiler.visualization_cache_hit()
+        cached = self.cache.get()
+
+        if cached is None:
+            return frame.copy()
+
+        return cached.copy()
 
     # ===========================
     # Static Drawing
@@ -66,7 +79,7 @@ class Visualizer:
     def draw_static(self, frame):
         cv2.putText(
             frame,
-            "Aiport AI Monitoring",
+            "Airport AI Monitoring",
             (20, 25),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.8,
@@ -84,7 +97,15 @@ class Visualizer:
             if (previous is not None and previous == obj.bbox):
                 pass
             self.previous_tracks[obj.track_id] = obj.bbox
-            draw_bbox(frame, obj.bbox)
+            color = self.class_colors.get(
+                obj.object_type,
+                (0,255,0)
+            )
+            draw_bbox(
+                frame,
+                obj.bbox,
+                color=color
+            )
             label = self.get_label(obj)
             draw_label(frame, obj.bbox, label,)
     
@@ -130,7 +151,9 @@ class Visualizer:
     def get_label(self, obj):
         if obj.track_id not in self.label_cache:
             self.label_cache[obj.track_id] = (
-                f"ID:{obj.track_id}"
+                f"{obj.class_name} "
+                f"ID:{obj.track_id} "
+                f"{obj.confidence:.2f}"
             )
         return self.label_cache[obj.track_id]
 

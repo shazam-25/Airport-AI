@@ -1,6 +1,13 @@
 class AirportAIApplication:
-    def __init__(self, pipelines):
+    def __init__(
+        self,
+        pipelines,
+        services,
+        runtime_store
+    ):
         self.pipelines = pipelines
+        self.services = services
+        self.runtime_store=runtime_store
 
     def run(self):
         """
@@ -8,33 +15,65 @@ class AirportAIApplication:
         """
         print(f"Starting {len(self.pipelines)} camera(s)")
         while True:
-            for pipeline in self.pipelines:
-                frame =  pipeline.process_frame()
+            for camera_id, pipeline in self.pipelines.items():
+                frame = pipeline.process_frame()
                 if frame is not None:
-                    self.display(pipeline.camera_id, frame)
+                    print(
+                        f"{camera_id}: frame processed"
+                    )
     
-    def display(self, camera_id, frame):
-        # Dashboard integration later
-        pass
+    # def display(self, camera_id, frame):
+    #     # Dashboard integration later
+    #     pass
     
     def stop(self):
-        """
-        Stops all camera pipelines.
-        """
-        for pipeline in self.pipelines:
-            pipeline.buffer.release()
+        for pipeline in self.pipelines.values():
+            if hasattr(pipeline.camera, "stop"):
+                pipeline.camera.stop()
+
+            if hasattr(pipeline.camera, "release"):
+                pipeline.camera.release()
+    def shutdown(self):
+        for pipeline in self.pipelines.values():
+            pipeline.analytics_executor.shutdown()
 
     def get_metrics(self):
-        results = []
-        for pipeline in self.pipelines:
-            results.append(pipeline.metrics.health())
-        return results
+        return [
+            pipeline.metrics.health()
+            for pipeline in self.pipelines.values()
+        ]
 
     def get_processing_stats(self):
         return [
-            pipeline.processing_stats() for pipeline in self.pipelines
+            pipeline.processing_stats()
+            for pipeline in self.pipelines.values()
         ]
 
-    def shutdown(self):
-        for pipeline in self.pipelines:
-            pipeline.analytics_executor.shutdown()
+    def get_pipeline(self, camera_id):
+        return self.pipelines.get(camera_id)
+
+    def get_runtime_store(self):
+        return self.runtime_store
+
+    def dashboard_snapshot(self):
+        snapshot = {}
+
+        for camera_id, pipeline in self.pipelines.items():
+            snapshot[camera_id] = {
+                "frame": pipeline.latest_frame,
+                "tracks": pipeline.latest_tracks,
+                "events": pipeline.latest_events,
+                "metrics": pipeline.metrics.health(),
+            }
+
+        return snapshot
+
+    def start(self):
+        for pipeline in self.pipelines.values():
+            pipeline.start()
+
+    
+
+    
+
+    

@@ -3,6 +3,7 @@ import numpy as np
 
 from airport_ai.performance.timer import Timer
 from airport_ai.performance.metrics import RuntimeMetrics
+from airport_ai.events.event_memory import EventMemory
 from airport_ai.config import config
 
 class CameraPipeline:
@@ -21,9 +22,11 @@ class CameraPipeline:
         visualizer,
         analytics_executor,
         profiler=None,
-    ):
-        self.camera_id = camera_config.camera_id
-        self.camera_name = camera_config.camera_name
+        runtime_store=None
+    ):  
+        self.camera_config = camera_config
+        # self.camera_id = camera_config.camera_id
+        # self.camera_name = camera_config.camera_name
         # self.source = camera_config.source
 
         self.camera = frame_buffer
@@ -37,12 +40,15 @@ class CameraPipeline:
         self.repository = repository
         self.storage_writer = storage_writer
         self.alert_manager = alert_manager
+        self.event_memory = EventMemory(config.get("events")["cooldown_seconds"])
         self.visualizer = visualizer
         self.analytics_executor = analytics_executor
 
         self.profiler = profiler
 
-        self.metrics = RuntimeMetrics(camera_id=self.camera_id)
+        self.runtime_store = runtime_store
+
+        self.metrics = RuntimeMetrics(camera_id=self.camera_config.camera_id)
 
         self.frame_skip = config.get("processing")["frame_skip"]
 
@@ -54,6 +60,18 @@ class CameraPipeline:
         self.dropped_frames = 0
 
         self._previous_gray = None
+        self.latest_frame = None
+
+        # Latest detections
+        self.latest_tracks = []
+
+        # Latest events
+        self.latest_events = {
+            "TURNAROUND": [],
+            "PPE": [],
+            "FOD": []
+        }
+        
 
     # =====================
     # Main Pipeline
@@ -148,7 +166,15 @@ class CameraPipeline:
         timer.start()
         for stream, stream_events in events:
             for event in stream_events:
-                self.storage_writer.submit(self.camera_id, stream, event)
+                key = (
+                    f"{stream}_"
+                    f"{event.event_type}_"
+                    f"{event.track_id}"
+                )
+                # prevent duplicate alerts
+                if not self.event_memory.allow(key):
+                    continue
+                self.storage_writer.submit(self.camera_config.camera_id, stream, event)
                 self.alert_manager.create_alert(stream, event)
         storage_time = timer.stop()
         if self.profiler:
@@ -161,13 +187,38 @@ class CameraPipeline:
         fps = self.metrics.fps()
         output = self.visualizer.render(
             frame=frame,
-            camera_name=self.camera_name,
+            camera_name=self.camera_config.camera_name,
             tracks=tracks,
             safety_events=safety_events,
             ppe_events=ppe_events,
             fod_events=fod_events,
             fps=fps
         )
+        # =====================
+        # Dashboard State Update
+        # =====================
+        self.latest_frame = output
+        self.latest_tracks = tracks
+        self.latest_events = {
+            "TURNAROUND": safety_events,
+            "PPE": ppe_events,
+            "FOD": fod_events
+        }
+        if self.runtime_store:
+            self.runtime_store.update_frame(
+                self.camera_config.camera_id,
+                output.copy()
+            )
+            print("RuntimeStore updated:", self.camera_config.camera_id)
+        if self.runtime_store:
+            for event_group in (
+                safety_events,
+                ppe_events,
+                fod_events
+            ):
+                for event in event_group:
+                    self.runtime_store.add_event(event)
+
         visualization_time = timer.stop()
         if self.profiler:
             self.profiler.record("visualization", visualization_time)
@@ -176,23 +227,50 @@ class CameraPipeline:
         # Runtime Metrics
         # ===================
         total_time = pipeline_timer.stop()
+        print("Updating metrics")
         self.metrics.update_frame(total_time)
+        if self.runtime_store:
+            self.runtime_store.update_metrics(
+                self.camera_config.camera_id,
+                self.metrics.health()
+            )
+        print(self.metrics.health())
+        if self.runtime_store:
+            self.runtime_store.update_metrics(
+                self.camera_config.camera_id,
+                self.metrics.health()
+            )
         # self.frame_count += 1
         self.processed_frames += 1
 
         if (self.profiler and self.processed_frames % config.get("performance")["summary_interval"] == 0):
             print("\n====== PERFORMANCE REPORT ======")
             report = self.profiler.summary()
-            for stage, values in report.items():
+            for name, values in report.items():
+                avg_ms = (
+                    values.get("avg_ms")
+                    or values.get("average_ms")
+                    or values.get("avg")
+                    or 0
+                )
                 print(
-                    f"{stage:<25}"
-                    f"{values['avg_ms']:.2f} ms"
+                    f"{name:<25}"
+                    f"{avg_ms:.2f} ms"
                 )
         
         print("\n===== RUUNTIME METRICS =====")
         print(self.metrics.health())
 
-        self.profiler.reset()
+        # self.profiler.reset()
+
+        print(f"Capture: {capture_time*1000:.2f} ms")
+        print(f"YOLO: {inference_time*1000:.2f} ms")
+        print(f"Tracking: {tracking_time*1000:.2f} ms")
+        print(f"Analytics: {analytics_time*1000:.2f} ms")
+        print(f"Storage: {storage_time*1000:.2f} ms")
+        print(f"Visualization: {visualization_time*1000:.2f} ms")
+
+        # self.latest_frame = output  # Dashboard
 
         return output
 
@@ -217,7 +295,7 @@ class CameraPipeline:
     # ====================
     def processing_stats(self):
         return {
-            "camera_id": self.camera_id,
+            "camera_id": self.camera_config.camera_id,
             "processed_frames": self.processed_frames,
             "skipped_frames": self.skipped_frames,
             "dropped_frames": self.dropped_frames,

@@ -9,6 +9,7 @@ class TrackedObject:
     """
     track_id: int
     class_id: int
+    object_type: str # MODIFICATION
     confidence: float
     bbox: List[float]
     camera_id: Optional[str] = None
@@ -18,6 +19,22 @@ class TrackedObject:
     age: int = 1
     missed_frames: int = 0
     active: bool = True
+
+    def __post_init__(self):    # MODIFICATION
+        if not self.object_type:
+            self.object_type = "unknown"
+        if len(self.bbox) != 4:
+            raise ValueError(
+                "Bounding box must be [x1,y1,x2,y2]"
+            )
+
+    def __repr__(self):
+        return (
+            f"TrackedObject("
+            f"id={self.track_id}, "
+            f"type={self.object_type}, "
+            f"conf={self.confidence:.2f})"
+        )
 
     @property
     def x1(self):
@@ -61,6 +78,29 @@ class TrackedObject:
             self.width *
             self.height
         )
+
+    @property
+    def class_name(self):
+        return self.object_type
+
+    # Semantic Helper -- MODIFICATION
+    @property
+    def is_worker(self):
+        return self.object_type == "worker"
+
+    @property
+    def is_equipment(self):
+        return self.object_type in {
+            "airport_tug",
+            "ground_support_equipment"
+        }
+
+    @property
+    def is_vehicle(self):
+        return self.object_type in {
+            "airport_tug",
+            "aircraft"
+        }
 
     def overlaps(
         self,
@@ -113,12 +153,15 @@ class TrackedObject:
 
     def update_bbox(
         self,
-        bbox
+        bbox,
+        confidence=None
     ):
         """
         Update position during tracking.
         """
         self.bbox = bbox
+        if confidence is not None:
+            self.confidence = confidence
         self.age += 1
         self.missed_frames = 0
         self.timestamp = time.time()
@@ -132,6 +175,7 @@ class TrackedObject:
         return {
             "track_id": self.track_id,
             "class_id": self.class_id,
+            "object_type": self.object_type, # MODIFICATION
             "confidence": self.confidence,
             "bbox": self.bbox,
             "camera_id": self.camera_id,
@@ -155,7 +199,9 @@ class TrackedObject:
         return cls(
             track_id=track_id,
             class_id=detection.class_id,
+            object_type=detection.class_name,   # MODIFICATION
             confidence=detection.confidence,
             bbox=detection.bbox,
             camera_id=camera_id
         )
+    

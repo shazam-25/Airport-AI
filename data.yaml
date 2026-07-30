@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 6
+names: ['aircraft', 'airport tug', 'cone', 'ground support equipment', 'safety vest', 'worker']
+
+roboflow:
+  workspace: mondal-shatakshi-samir-lipika
+  project: airport-ground-operations
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/mondal-shatakshi-samir-lipika/airport-ground-operations/dataset/1

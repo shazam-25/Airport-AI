@@ -1,9 +1,11 @@
 from airport_ai.app.application import AirportAIApplication
-from airport_ai.app.services import SharedServices
+from airport_ai.app.services import SharedServices, DashboardService
 from airport_ai.pipeline.camera_pipeline import CameraPipeline
 from airport_ai.config.camera import CameraConfig
 from airport_ai.streams.camera import AsyncCamera
 from airport_ai.analytics.executor import AnalyticsExecutor
+from airport_ai.config import config
+from airport_ai.dashboard.runtime_store import runtime_store
 
 class ApplicationBuilder:
     def __init__(self, config):
@@ -15,7 +17,18 @@ class ApplicationBuilder:
         """
         services = self.create_services()
         pipelines = self.create_camera_pipelines(services)
-        return AirportAIApplication(pipelines=pipelines)
+        dashboard_service = DashboardService(
+            pipelines=pipelines,
+            repository=services.repository
+        )
+        app_services = {
+            "dashboard": dashboard_service
+        }
+        return AirportAIApplication(
+            pipelines=pipelines,
+            services=app_services,
+            runtime_store=runtime_store
+        )
 
     def create_services(self):
         # ==============
@@ -58,7 +71,7 @@ class ApplicationBuilder:
         model_config = self.config.get("model")
 
         inference_engine = YOLOEngine(
-            model_path=model_config["path"],
+            model_path=config.resolve_path(model_config["path"]),
             confidence=model_config["confidence"],
             device=model_config["device"],
         )
@@ -68,7 +81,10 @@ class ApplicationBuilder:
         # ====================
         from airport_ai.tracking.tracker import ObjectTracker
 
-        tracker_factory = lambda: ObjectTracker()
+        tracker_factory = lambda: ObjectTracker(
+            iou_threshold=config.get("tracking")["iou_threshold"],
+            max_missing_frames=config.get("tracking")["max_missing_frames"]
+        )
 
         # =================
         # Profiler
@@ -127,7 +143,7 @@ class ApplicationBuilder:
         )
     
     def create_camera_pipelines(self, services):
-        pipelines = []
+        pipelines = {}
         camera_configs = [
             CameraConfig(camera) for camera in self.config.get("cameras")
         ]
@@ -153,7 +169,14 @@ class ApplicationBuilder:
                 alert_manager=services.alert_manager,
                 visualizer=services.visualizer,
                 analytics_executor=services.analytics_executor,
-                profiler=services.profiler
+                profiler=services.profiler,
+                runtime_store=runtime_store,
             )
-            pipelines.append(pipeline)
+
+            pipelines[camera_config.camera_id] = pipeline
+        print(
+            "PIPELINES:",
+            pipelines
+        )
+
         return pipelines

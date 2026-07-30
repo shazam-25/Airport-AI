@@ -1,4 +1,3 @@
-# from datetime import datetime
 from typing import List
 # from airport_ai.decision.turnaround.structures import SafetyEvent
 # from airport_ai.decision.turnaround.zone import SafetyZoneGenerator
@@ -64,18 +63,28 @@ class TurnaroundEvaluator:
             return events
         assert self.aircraft is not None
         for obj in tracks:
+            # ignore aircraft itself
             if obj.track_id == self.aircraft.track_id:
+                continue
+            # only safety relevant objects
+            if obj.object_type not in {
+                "worker", "airport_tug", "ground_support_equipment"
+            }:
                 continue
             if self.zone.contains(obj):
                 events.append(
                     SafetyEvent(
+                        timestamp=datetime.utcnow(),
                         camera_id=self.camera_id,
                         track_id=obj.track_id,
                         object_type=self.class_name(obj),
                         event_type="SAFETY_ZONE_INTRUSION",
                         severity="HIGH",
-                        message=f"Equipment {obj.track_id} entered aircraft safety zone.",
-                        timestamp=datetime.utcnow(),
+                        message=(
+                            f"{obj.object_type} "
+                            f"{obj.track_id} "
+                            "entered aircraft safety zone."
+                        ),
                     )
                 )
         return events
@@ -83,11 +92,9 @@ class TurnaroundEvaluator:
     def select_aircraft(self, tracks):
         for obj in tracks:
             # update according to your YOLO class map
-            if obj.class_id == 4:
+            if obj.object_type == "aircraft":   # 0: aircraft
                 return obj
         return None
     
     def class_name(self,obj):
-        return str(
-            obj.class_id
-        )
+        return obj.object_type  # MODIFICATION

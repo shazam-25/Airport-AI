@@ -25,7 +25,12 @@ class RuntimeMetrics:
         if len(self.frame_times) < 2:
             return 0
 
+        print(self.frame_times)
+
         elapsed = (self.frame_times[-1] - self.frame_times[0])
+
+        print("Elapsed:", elapsed)
+        print("Frames:", len(self.frame_times))
 
         if elapsed == 0:
             return 0

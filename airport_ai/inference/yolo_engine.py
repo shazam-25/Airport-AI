@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 import torch
 from airport_ai.inference.detection import Detection
+from airport_ai.config import config
 
 class YOLOEngine:
     def __init__(
@@ -14,9 +15,12 @@ class YOLOEngine:
         # batch_size=1,
     ):
         self.confidence = confidence
-        self.image_size = image_size
+        self.image_size = config.get("model")["image_size"]
         # self.batch_size = batch_size
+        self.iou = config.get("model")["iou"]   # MODIFICATION
+        self.device = device
 
+              
         # ===================
         # Device Selection
         # ===================
@@ -25,7 +29,9 @@ class YOLOEngine:
         # =================
         # Load Model
         # =================
-        self.model = YOLO(model_path)
+        self.model = YOLO(model_path)  # MODIFICATION
+        # Automatically load class names from the model -- MODIFICATION
+        self.class_names = self.model.names
 
         # ================
         # FP16
@@ -39,6 +45,10 @@ class YOLOEngine:
         # ==============
         if warmup:
             self.warmup()
+
+        print(f"Loaded model: {model_path}")
+        print(f"Device: {self.device}")
+        print(f"Classes: {self.class_names}")
 
     def select_device(self, device):
         if device != "auto":
@@ -62,6 +72,8 @@ class YOLOEngine:
         self.model.predict(
                 dummy, 
                 imgsz=self.image_size, 
+                conf=self.confidence,   # MODIFICATION
+                iou=self.iou, # MODIFICATION
                 device=self.device,
                 half=self.half,
                 verbose=False
@@ -84,13 +96,15 @@ class YOLOEngine:
         for result in results:
             boxes = result.boxes
             for box in boxes:
-                detections.append(
-                    Detection(
-                        class_id=int(box.cls.cpu().item()),
-                        confidence=float(box.cls.cpu().item()),
-                        bbox=box.xyxy[0].cpu().tolist()
-                    )
-                )
+                class_id = int(box.cls.cpu().item())
+                detection = Detection(
+                            class_id=class_id,
+                            class_name=self.class_names[class_id],  #MODIFICATION
+                            confidence=float(box.conf.cpu().item()),
+                            bbox=box.xyxy[0].cpu().tolist()
+                        )
+                detection.validate()
+                detections.append(detection)
         return detections
 
     

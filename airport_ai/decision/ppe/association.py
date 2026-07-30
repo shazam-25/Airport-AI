@@ -7,6 +7,15 @@ class PPEAssociation:
     Associates PPE detections with tracked person
     using bounding box overlap.
     """
+    def __init__(self):
+        self.vest_classes = {
+            "safety_vest"
+        }
+        self.ear_classes = {
+            "ear_protection"
+        }
+        self.threshold = 0.1
+
     # @staticmethod
     # def iou(box_a, box_b):
     #     x_left = max(box_a.x1, box_b.x1)
@@ -45,17 +54,26 @@ class PPEAssociation:
     #             status.ear_protection = True
     #     return status
 
-    def associate(self, persons, ppe_objects):  # Associate all person
+    def associate(self, workers, ppe_items):  # Associate all person
         statuses = []
-        for person in persons:
-            status = PPEStatus(track_id=person.track_id)
-            for item in ppe_objects:
-                if not person.overlaps(item, threshold=0.05):
+        for worker in workers:
+            has_vest  = False
+            has_ear_protection = False
+            for item in ppe_items:
+                # First check object type
+                object_type = item.object_type.lower()
+                if not worker.overlaps(item, threshold=self.threshold):
                     continue
-                # CHANGES FOR LATER update according to YOLO classes
-                if item.class_id == 14:
-                    status.safety_vest = True
-                elif item.class_id == 15:
-                    status.ear_protection = True
-            statuses.append(status)
+                if object_type in self.vest_classes:
+                    has_vest = True
+                elif object_type in self.ear_classes:
+                    has_ear_protection = True
+            statuses.append(
+                PPEStatus(
+                    track_id=worker.track_id,
+                    person=worker,
+                    safety_vest=has_vest,
+                    ear_protection=has_ear_protection,
+                )
+            )
         return statuses

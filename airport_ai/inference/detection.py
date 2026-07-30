@@ -9,6 +9,7 @@ class Detection:
     Consumed by: ObjectTracker
     """
     class_id: int
+    class_name: str # MODIFICATION
     confidence: float
     bbox: List[float]
 
@@ -42,3 +43,11 @@ class Detection:
     @property
     def height(self):
         return self.y2 - self.y1
+
+    def validate(self):
+        assert len(self.bbox) == 4, \
+            "Bounding box must contain [x1,y1,x2,y2]"
+        assert 0 <= self.confidence <= 1, \
+            "Confidence must be between 0 and 1"
+        assert self.class_name is not None, \
+            "Class name cannot be None"
