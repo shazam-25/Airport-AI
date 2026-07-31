@@ -17,3 +17,10 @@ tqdm
 PyYAML
 roboflow
 streamlit-autorefresh
+reportlab
+loguru
+lap
+cython_bbox
+thop
+pycocotools
+scipy

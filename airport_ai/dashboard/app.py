@@ -1,5 +1,5 @@
 import time
-from io import BytesIO
+# from io import BytesIO
 from datetime import datetime
 
 import pandas as pd
@@ -15,61 +15,22 @@ sys.path.insert(0, str(ROOT))
 from airport_ai.config import config
 from airport_ai.dashboard.runtime_store import RuntimeStore
 
-# store = RuntimeStore("data/database/runtime.db")
-
-
-# # =============================================================================
-# # Camera Grid
-# # =============================================================================
-
-# camera_ids = [
-#     "GATE_A01",
-#     "GATE_B03",
-#     "GATE_C04"
-# ]
-
-# cols = st.columns(len(camera_ids))
-
-# camera_slots = {}
-
-# for col, camera_id in zip(cols, camera_ids):
-#     with col:
-#         st.subheader(camera_id)
-#         camera_slots[camera_id] = st.empty()
-
-
-# # =============================================================================
-# # Refresh Loop
-# # =============================================================================
-
-# while True:
-
-#     for camera_id in camera_ids:
-
-#         frame = store.get_frame(camera_id)
-
-#         if frame is not None:
-#             camera_slots[camera_id].image(
-#                 frame,
-#                 channels="BGR",
-#                 use_container_width=True
-#             )
-#         else:
-#             camera_slots[camera_id].warning(
-#                 "Waiting for frames..."
-#             )
-
-#     time.sleep(0.5)
-
-
 # =============================================================================
 # Runtime Store
 # =============================================================================
 
 store = RuntimeStore(
-    str(config.resolve_path(
-        config.get("dashboard")["runtime_db"]
-    ))
+    runtime_db=str(
+        config.resolve_path(
+            config.get("dashboard")["runtime_db"]
+        )
+    ),  # Live frames only
+
+    monitor_db=str(
+        config.resolve_path(
+            config.get("database")["path"]
+        )
+    )   # Events + Alerts
 )
 
 
@@ -77,20 +38,20 @@ store = RuntimeStore(
 # Helper Functions
 # =============================================================================
 
-def severity_icon(severity: str) -> str:
-    """
-    Returns emoji corresponding to severity.
-    """
+# def severity_icon(severity: str) -> str:
+#     """
+#     Returns emoji corresponding to severity.
+#     """
 
-    severity = severity.upper()
+#     severity = severity.upper()
 
-    icons = {
-        "HIGH": "🔴",
-        "MEDIUM": "🟠",
-        "LOW": "🟢"
-    }
+#     icons = {
+#         "HIGH": "🔴",
+#         "MEDIUM": "🟠",
+#         "LOW": "🟢"
+#     }
 
-    return icons.get(severity, "⚪")
+#     return icons.get(severity, "⚪")
 
 
 def format_timestamp(ts):
@@ -224,17 +185,16 @@ while True:
     # -------------------------------------------------------------------------
     # Camera Streams
     # -------------------------------------------------------------------------
-
+    frames = {}
     for camera_id in camera_ids:
-
-        frame = store.get_frame(camera_id)
+        frames[camera_id] = store.get_frame(camera_id)
         # print(f"{camera_id}: {'Frame OK' if frame is not None else 'No Frame'}")
-
+    for camera_id, frame in frames.items():
         if frame is not None:
             camera_placeholders[camera_id].image(
                 frame,
                 channels="BGR",
-                # width="stretch"
+                use_container_width=True
             )
 
         else:
@@ -259,23 +219,11 @@ while True:
         st.markdown("### 🔴 HIGH")
 
         if high_event:
-
-            st.write(
-                f"**Time:** {format_timestamp(high_event[5])}"
-            )
-
-            st.write(
-                f"**Camera:** {high_event[1]}"
-            )
-
-            st.write(
-                f"**Event:** {high_event[2]}"
-            )
-
-            st.write(
-                high_event[4]
-            )
-
+            st.write(f"**Time:** {high_event[1]}")
+            st.write(f"**Camera:** {high_event[0]}")
+            st.write(f"**Object:** {high_event[2]}")
+            st.write(f"**Event:** {high_event[3]}")
+            st.write(high_event[5])
         else:
 
             st.info(
@@ -289,22 +237,11 @@ while True:
         st.markdown("### 🟠 MEDIUM")
 
         if medium_event:
-
-            st.write(
-                f"**Time:** {format_timestamp(medium_event[5])}"
-            )
-
-            st.write(
-                f"**Camera:** {medium_event[1]}"
-            )
-
-            st.write(
-                f"**Event:** {medium_event[2]}"
-            )
-
-            st.write(
-                medium_event[4]
-            )
+            st.write(f"**Time:** {medium_event[1]}")
+            st.write(f"**Camera:** {medium_event[0]}")
+            st.write(f"**Object:** {medium_event[2]}")
+            st.write(f"**Event:** {medium_event[3]}")
+            st.write(medium_event[5])
 
         else:
 
@@ -320,21 +257,11 @@ while True:
 
         if low_event:
 
-            st.write(
-                f"**Time:** {format_timestamp(low_event[5])}"
-            )
-
-            st.write(
-                f"**Camera:** {low_event[1]}"
-            )
-
-            st.write(
-                f"**Event:** {low_event[2]}"
-            )
-
-            st.write(
-                low_event[4]
-            )
+            st.write(f"**Time:** {low_event[1]}")
+            st.write(f"**Camera:** {low_event[0]}")
+            st.write(f"**Object:** {low_event[2]}")
+            st.write(f"**Event:** {low_event[3]}")
+            st.write(low_event[5])
 
         else:
 
@@ -414,14 +341,14 @@ while True:
     # System Status
     # -------------------------------------------------------------------------
     online_cameras = 0
-    for camera_id in camera_ids:
-        frame = store.get_frame(camera_id)
+    for camera_id, frame in frames.items():
+        # frame = store.get_frame(camera_id)
         if frame is not None:
             online_cameras += 1
             camera_placeholders[camera_id].image(
                 frame,
                 channels="BGR",
-                width="stretch"
+                use_container_width=True
             )
         else:
             camera_placeholders[camera_id].warning(
@@ -441,8 +368,8 @@ while True:
         pipeline_status
     )
     try:
-        conn = sqlite3.connect(store.path)
-        conn.close()
+        sqlite3.connect(store.runtime_db).close()
+        sqlite3.connect(store.monitor_db).close()
         db_status = "🟢 Connected"
     except Exception:
         db_status = "🔴 Error"

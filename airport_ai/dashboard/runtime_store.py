@@ -4,28 +4,19 @@ import cv2
 import numpy as np
 
 class RuntimeStore:
-    def __init__(self, path="data/database/runtime.db"):
-        self.path = path
-        self.init_db()
+    def __init__(self, runtime_db, monitor_db):
+        self.runtime_db = runtime_db
+        self.monitor_db = monitor_db
+        self.init_runtime_db()
 
-    def init_db(self):
-        conn = sqlite3.connect(self.path)
+    def init_runtime_db(self):
+        conn = sqlite3.connect(self.runtime_db)
         cursor = conn.cursor()
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS frames(
             camera_id TEXT PRIMARY KEY,
             timestamp REAL,
             image BLOB
-        )
-        """)
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS events(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            camera_id TEXT,
-            event_type TEXT,
-            severity TEXT,
-            message TEXT,
-            timestamp REAL
         )
         """)
         conn.commit()
@@ -41,7 +32,7 @@ class RuntimeStore:
             frame
         )
         blob = buffer.tobytes()
-        conn = sqlite3.connect(self.path)
+        conn = sqlite3.connect(self.runtime_db)
         conn.execute(
             """
             INSERT OR REPLACE INTO frames
@@ -60,7 +51,7 @@ class RuntimeStore:
         self,
         camera_id
     ):
-        conn = sqlite3.connect(self.path)
+        conn = sqlite3.connect(self.runtime_db)
         row = conn.execute(
             """
             SELECT image
@@ -81,39 +72,39 @@ class RuntimeStore:
             cv2.IMREAD_COLOR
         )
 
-    def save_event(
-        self,
-        event
-    ):
-        conn = sqlite3.connect(self.path)
-        conn.execute(
-            """
-            INSERT INTO events
-            (
-            camera_id,
-            event_type,
-            severity,
-            message,
-            timestamp
-            )
-            VALUES(?,?,?,?,?)
-            """,
-            (
-                event.camera_id,
-                event.event_type,
-                event.severity,
-                event.message,
-                time.time()
-            )
-        )
-        conn.commit()
-        conn.close()
+    # def save_event(
+    #     self,
+    #     event
+    # ):
+    #     conn = sqlite3.connect(self.path)
+    #     conn.execute(
+    #         """
+    #         INSERT INTO events
+    #         (
+    #         camera_id,
+    #         event_type,
+    #         severity,
+    #         message,
+    #         timestamp
+    #         )
+    #         VALUES(?,?,?,?,?)
+    #         """,
+    #         (
+    #             event.camera_id,
+    #             event.event_type,
+    #             event.severity,
+    #             event.message,
+    #             time.time()
+    #         )
+    #     )
+    #     conn.commit()
+    #     conn.close()
     
     def get_events(
         self,
         limit=50
     ):
-        conn = sqlite3.connect(self.path)
+        conn = sqlite3.connect(self.monitor_db)
         rows = conn.execute(
             """
             SELECT *
@@ -128,15 +119,22 @@ class RuntimeStore:
 
     # Get latest events
     def get_latest_event_by_severity(self, severity):
-        conn = sqlite3.connect(self.path)
+        conn = sqlite3.connect(self.monitor_db)
         row = conn.execute(
             """
-            SELECT *
-            FROM events
-            WHERE severity=?
-            ORDER BY timestamp DESC
-            LIMIT 1
-            """,
+            SELECT
+            camera_id,
+            timestamp,
+            object_type,
+            event_type,
+            severity,
+            message,
+            track_id
+        FROM events
+        WHERE severity=?
+        ORDER BY id DESC
+        LIMIT 1
+        """,
             (severity,)
         ).fetchone()
         conn.close()
@@ -144,7 +142,7 @@ class RuntimeStore:
 
     # Get event count
     def get_event_counts(self):
-        conn = sqlite3.connect(self.path)
+        conn = sqlite3.connect(self.monitor_db)
         cursor = conn.cursor()
         cursor.execute("""
             SELECT severity, COUNT(*)
@@ -167,7 +165,7 @@ class RuntimeStore:
 
     # Get Severity Distribution
     def get_severity_distribution(self):
-        conn = sqlite3.connect(self.path)
+        conn = sqlite3.connect(self.monitor_db)
         rows = conn.execute("""
             SELECT severity,
                 COUNT(*)

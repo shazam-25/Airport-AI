@@ -4,11 +4,11 @@
 cameras:
   - camera_id: "GATE_A01"
     camera_name: "Gate A01"
-    source: "data/videos/04_sample.mp4"
+    source: "data/videos/01_sample.mp4"
 
   - camera_id: "GATE_B03"
     camera_name: "Gate B03"
-    source: "data/videos/01_sample.mp4"
+    source: "data/videos/02_sample.mp4"
 
   - camera_id: "GATE_C04"
     camera_name: "Gate C04"
