@@ -7,7 +7,7 @@ class FrameBuffer:
     Stores frames only.
     Drops the oldest frame when full.
     """
-    def __init__(self, source, maxsize=30):
+    def __init__(self, maxsize=10):
         self.queue = Queue(maxsize=maxsize)
         self.lock = Lock()
 

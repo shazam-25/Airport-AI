@@ -19,11 +19,12 @@ class VideoSource:
     
     def read(self):
         ret, frame = self.cap.read()
-        if not ret:
-            # Restart video file
-            self.cap.release()
-            self.cap = cv2.VideoCapture(self.path)
-            ret, frame = self.cap.read()
+        # Cause of not reaching Video EOF
+        # if not ret:
+        #     # Restart video file
+        #     self.cap.release()
+        #     self.cap = cv2.VideoCapture(self.path)
+        #     ret, frame = self.cap.read()
         return ret, frame
         
 

@@ -14,7 +14,7 @@ class AsyncCamera:
         frame_skip=1
     ):
         self.source = VideoSource(source)
-        self.buffer = FrameBuffer(queue_size)
+        self.buffer = FrameBuffer(maxsize=queue_size)
         self.width = width
         self.height = height
         self.frame_skip = frame_skip
@@ -22,6 +22,7 @@ class AsyncCamera:
 
     def start(self):
         self.running = True
+        # One thread per camera
         self.thread = threading.Thread(target=self.update, daemon=True)
         self.thread.start()
         return self
@@ -35,6 +36,7 @@ class AsyncCamera:
         frame_count = 0
         while self.running:
             ret, frame = self.source.read()
+            # EOF Handling
             if not ret:
                 print(
                 "Video ended:",
