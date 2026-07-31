@@ -17,9 +17,12 @@ class ApplicationBuilder:
         """
         services = self.create_services()   # Creates one shared service container
         runtime_store = RuntimeStore(
-            self.config.resolve_path(
+            str(self.config.resolve_path(
                 self.config.get("dashboard")["runtime_db"]
-            )   # One RuntimeStore instance
+            )),
+            str(self.config.resolve_path(
+                self.config.get("database")["path"]
+            ))   # One RuntimeStore instance
         )
         pipelines = self.create_camera_pipelines(
             services,

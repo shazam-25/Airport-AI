@@ -72,33 +72,39 @@ class RuntimeStore:
             cv2.IMREAD_COLOR
         )
 
-    # def save_event(
-    #     self,
-    #     event
-    # ):
-    #     conn = sqlite3.connect(self.path)
-    #     conn.execute(
-    #         """
-    #         INSERT INTO events
-    #         (
-    #         camera_id,
-    #         event_type,
-    #         severity,
-    #         message,
-    #         timestamp
-    #         )
-    #         VALUES(?,?,?,?,?)
-    #         """,
-    #         (
-    #             event.camera_id,
-    #             event.event_type,
-    #             event.severity,
-    #             event.message,
-    #             time.time()
-    #         )
-    #     )
-    #     conn.commit()
-    #     conn.close()
+    def save_event(
+        self,
+        event
+    ):
+        conn = sqlite3.connect(self.monitor_db)
+        conn.execute(
+            """
+            INSERT INTO events
+            (
+            camera_id,
+            timestamp,
+            stream,
+            track_id,
+            object_type,
+            event_type,
+            severity,
+            message
+            )
+            VALUES(?,?,?,?,?)
+            """,
+            (
+                event.camera_id,
+                getattr(event, "timestamp", None),
+                getattr(event, "stream", ""),
+                getattr(event, "track_id", None),
+                getattr(event, "object_type", ""),
+                event.event_type,
+                event.severity,
+                event.message,
+            )
+        )
+        conn.commit()
+        conn.close()
     
     def get_events(
         self,

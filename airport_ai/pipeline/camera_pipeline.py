@@ -175,10 +175,14 @@ class CameraPipeline:
                 # prevent duplicate alerts
                 if not self.event_memory.allow(key):
                     continue
+                # self.runtime_store.save_frame(
+                #     self.camera_config.camera_id,
+                #     frame
+                # )
                 self.storage_writer.submit(self.camera_config.camera_id, stream, event)
                 self.alert_manager.create_alert(stream, event)
-                if self.runtime_store:  # DASHBOARD
-                    self.runtime_store.save_event(event)
+                # if self.runtime_store:  # DASHBOARD
+                #     self.runtime_store.save_event(event)
         storage_time = timer.stop()
         if self.profiler:
             self.profiler.record("storage_alerts", storage_time)
@@ -207,12 +211,12 @@ class CameraPipeline:
         #     "PPE": ppe_events,
         #     "FOD": fod_events
         # }
-        # if self.runtime_store:
-        #     self.runtime_store.save_frame(
-        #         self.camera_config.camera_id,
-        #         output
-        #         # output.copy()
-        #     )
+        if self.runtime_store:
+            self.runtime_store.save_frame(
+                self.camera_config.camera_id,
+                output
+                # output.copy()
+            )
         #     print("RuntimeStore updated:", self.camera_config.camera_id)
         # if self.runtime_store:    Duplicate save events 
         #     for event_group in (
