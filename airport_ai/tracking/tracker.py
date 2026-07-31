@@ -57,7 +57,7 @@ class ObjectTracker:
 
     def predict_only(self):
         """
-        ACalled when frames are skipped.
+        Called when frames are skipped.
         maintains existing tracks.
         """
         predicted_tracks = []
