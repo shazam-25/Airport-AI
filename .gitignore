@@ -5,3 +5,4 @@ __pycache__/
 datasets
 cvat
 weights/
+yolo26n.pt
