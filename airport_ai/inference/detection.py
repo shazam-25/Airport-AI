@@ -12,6 +12,7 @@ class Detection:
     class_name: str # MODIFICATION
     confidence: float
     bbox: List[float]
+    track_id: int | None = None
 
     @property
     def x1(self):

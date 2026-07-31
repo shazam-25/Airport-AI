@@ -14,13 +14,26 @@ class AirportAIApplication:
         Starts all camera pipelines.
         """
         print(f"Starting {len(self.pipelines)} camera(s)")
-        while True:
-            for camera_id, pipeline in self.pipelines.items():
+        active = dict(self.pipelines)
+        while active:
+            finished = []
+            for camera_id, pipeline in active.items():
                 frame = pipeline.process_frame()
                 if frame is not None:
                     print(
                         f"{camera_id}: frame processed"
                     )
+                camera = pipeline.camera
+                if (
+                    not camera.running and camera.buffer.empty()
+                ):
+                    print(f"{camera_id} completed.")
+                    finished.append(camera_id)
+            for camera_id in finished:
+                pipeline = active.pop(camera_id)
+                pipeline.camera.stop()
+            if not active: break
+        self.shutdown()
     
     # def display(self, camera_id, frame):
     #     # Dashboard integration later

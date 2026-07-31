@@ -81,13 +81,16 @@ class YOLOEngine:
             
 
     def detect(self, frame):
-        results = self.model.predict(
+        results = self.model.track(
             source=frame,
+            persist=True,
+            tracker=config.get("tracking")["tracker"],
             imgsz=self.image_size,
             conf=self.confidence,
+            iou=self.iou,
             device=self.device,
             half=self.half,
-            verbose=False
+            verbose=False,
         )
         return self.parse_results(results)
 
@@ -97,13 +100,20 @@ class YOLOEngine:
             boxes = result.boxes
             for box in boxes:
                 class_id = int(box.cls.cpu().item())
+                # ByteTrack may not assign an ID immediately
+                track_id = None
+                if getattr(box, "id", None) is not None:
+                    track_id = int(box.id.cpu().item())
+
                 detection = Detection(
-                            class_id=class_id,
-                            class_name=self.class_names[class_id],  #MODIFICATION
-                            confidence=float(box.conf.cpu().item()),
-                            bbox=box.xyxy[0].cpu().tolist()
-                        )
+                    class_id=class_id,
+                    class_name=self.class_names[class_id],
+                    confidence=float(box.conf.cpu().item()),
+                    bbox=box.xyxy[0].cpu().tolist(),
+                    track_id=track_id,
+                )
                 detection.validate()
+                # detection.track_id = track_id
                 detections.append(detection)
         return detections
 

@@ -34,7 +34,7 @@ class FODEvaluator:
                         track_id=obj.track_id,
                         object_type=obj.object_type,
                         event_type="STATIONARY_FOD",
-                        severity="LOW",
+                        severity="MEDIUM",
                         message=(
                             f"{obj.object_type} "
                             f"{obj.track_id} "

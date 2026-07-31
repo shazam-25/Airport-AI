@@ -232,7 +232,9 @@ class CameraPipeline:
         # ===================
         total_time = pipeline_timer.stop()
         print("Updating metrics")
-        # self.metrics.update_frame(total_time)
+        self.metrics.update_frame(total_time)
+        if hasattr(self.camera, "size"):
+            self.metrics.update_queue(self.camera.size())
         # if self.runtime_store:
         #     self.runtime_store.update_metrics(
         #         self.camera_config.camera_id,
@@ -243,7 +245,7 @@ class CameraPipeline:
         #     self.runtime_store.update_metrics(
         #         self.camera_config.camera_id,
         #         self.metrics.health()
-        #     )
+            # )
         # self.frame_count += 1
         self.processed_frames += 1
 

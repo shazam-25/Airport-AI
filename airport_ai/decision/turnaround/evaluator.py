@@ -68,7 +68,7 @@ class TurnaroundEvaluator:
                 continue
             # only safety relevant objects
             if obj.object_type not in {
-                "worker", "airport_tug", "ground_support_equipment"
+                "airport_tug", "ground_support_equipment"
             }:
                 continue
             if self.zone.contains(obj):
