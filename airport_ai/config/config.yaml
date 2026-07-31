@@ -89,6 +89,7 @@ events:
 # Dashboard
 # =====================
 dashboard:
+  runtime_db: "data/database/runtime.db"
   refresh_seconds: 2
 
 # =====================

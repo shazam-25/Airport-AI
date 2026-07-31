@@ -29,7 +29,7 @@ REQUIRE_EAR_PROTECTION = True
 FOD_STATIONARY_SECONDS = 30
 
 # Database
-DATABASE_PATH = PROJECT_ROOT / "database/airport_monitor.db"
+DATABASE_PATH = PROJECT_ROOT / "data/database/airport_monitor.db"
 
 # Multi-Camera Support
 CAMERAS = [
@@ -44,8 +44,8 @@ CAMERAS = [
         "source": str(VIDEO_DIR/"02_sample.mp4")
     },
     {
-        "camera_id": "GATE_D05",
-        "name": "Gate D05",
-        "source": str(VIDEO_DIR/"03_sampel.mp4")
+        "camera_id": "GATE_C04",
+        "name": "Gate C04",
+        "source": str(VIDEO_DIR/"03_sample.mp4")
     }
 ]
