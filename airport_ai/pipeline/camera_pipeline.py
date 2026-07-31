@@ -1,3 +1,4 @@
+from posix import eventfd
 import cv2
 import numpy as np
 
@@ -176,6 +177,8 @@ class CameraPipeline:
                     continue
                 self.storage_writer.submit(self.camera_config.camera_id, stream, event)
                 self.alert_manager.create_alert(stream, event)
+                if self.runtime_store:  # DASHBOARD
+                    self.runtime_store.save_event(event)
         storage_time = timer.stop()
         if self.profiler:
             self.profiler.record("storage_alerts", storage_time)
@@ -197,27 +200,28 @@ class CameraPipeline:
         # =====================
         # Dashboard State Update
         # =====================
-        self.latest_frame = output
-        self.latest_tracks = tracks
-        self.latest_events = {
-            "TURNAROUND": safety_events,
-            "PPE": ppe_events,
-            "FOD": fod_events
-        }
-        if self.runtime_store:
-            self.runtime_store.update_frame(
-                self.camera_config.camera_id,
-                output.copy()
-            )
-            print("RuntimeStore updated:", self.camera_config.camera_id)
-        if self.runtime_store:
-            for event_group in (
-                safety_events,
-                ppe_events,
-                fod_events
-            ):
-                for event in event_group:
-                    self.runtime_store.add_event(event)
+        # self.latest_frame = output
+        # self.latest_tracks = tracks
+        # self.latest_events = {
+        #     "TURNAROUND": safety_events,
+        #     "PPE": ppe_events,
+        #     "FOD": fod_events
+        # }
+        # if self.runtime_store:
+        #     self.runtime_store.save_frame(
+        #         self.camera_config.camera_id,
+        #         output
+        #         # output.copy()
+        #     )
+        #     print("RuntimeStore updated:", self.camera_config.camera_id)
+        # if self.runtime_store:    Duplicate save events 
+        #     for event_group in (
+        #         safety_events,
+        #         ppe_events,
+        #         fod_events
+        #     ):
+        #         for event in event_group:
+        #             self.runtime_store.save_event(event)
 
         visualization_time = timer.stop()
         if self.profiler:
@@ -228,18 +232,18 @@ class CameraPipeline:
         # ===================
         total_time = pipeline_timer.stop()
         print("Updating metrics")
-        self.metrics.update_frame(total_time)
-        if self.runtime_store:
-            self.runtime_store.update_metrics(
-                self.camera_config.camera_id,
-                self.metrics.health()
-            )
-        print(self.metrics.health())
-        if self.runtime_store:
-            self.runtime_store.update_metrics(
-                self.camera_config.camera_id,
-                self.metrics.health()
-            )
+        # self.metrics.update_frame(total_time)
+        # if self.runtime_store:
+        #     self.runtime_store.update_metrics(
+        #         self.camera_config.camera_id,
+        #         self.metrics.health()
+        #     )
+        # print(self.metrics.health())
+        # if self.runtime_store:
+        #     self.runtime_store.update_metrics(
+        #         self.camera_config.camera_id,
+        #         self.metrics.health()
+        #     )
         # self.frame_count += 1
         self.processed_frames += 1
 
