@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from airport_ai.dashboard.runtime_store import runtime_store
+# from airport_ai.dashboard.runtime_store import RuntimeStore
 
 @dataclass
 class SharedServices:
@@ -23,68 +23,68 @@ class SharedServices:
     profiler: object | None = None
 
 
-class DashboardService:
+# class DashboardService:
 
-    def __init__(
-        self,
-        pipelines,
-        repository
-    ):
-        self.pipelines = pipelines
-        self.repository = repository
-        self.runtime_store = runtime_store
-
-
-    def get_frame(
-        self,
-        camera_id
-    ):
-
-        pipeline = self.pipelines.get(camera_id)
-
-        if pipeline is None:
-            return None
-
-        return pipeline.latest_frame
+#     def __init__(
+#         self,
+#         pipelines,
+#         repository
+#     ):
+#         self.pipelines = pipelines
+#         self.repository = repository
+#         self.runtime_store = runtime_store
 
 
+#     def get_frame(
+#         self,
+#         camera_id
+#     ):
 
-    def get_metrics(
-        self,
-        camera_id
-    ):
+#         pipeline = self.pipelines.get(camera_id)
 
-        pipeline = self.pipelines.get(camera_id)
+#         if pipeline is None:
+#             return None
 
-        if pipeline is None:
-            return None
-
-        return pipeline.metrics.health()
+#         return pipeline.latest_frame
 
 
 
-    def get_objects(
-        self,
-        camera_id
-    ):
+#     def get_metrics(
+#         self,
+#         camera_id
+#     ):
 
-        pipeline = self.pipelines.get(camera_id)
+#         pipeline = self.pipelines.get(camera_id)
 
-        if pipeline is None:
-            return []
+#         if pipeline is None:
+#             return None
 
-        return pipeline.latest_tracks
+#         return pipeline.metrics.health()
 
 
 
-    def get_events(
-        self,
-        camera_id
-    ):
+#     def get_objects(
+#         self,
+#         camera_id
+#     ):
 
-        pipeline = self.pipelines.get(camera_id)
+#         pipeline = self.pipelines.get(camera_id)
 
-        if pipeline is None:
-            return {}
+#         if pipeline is None:
+#             return []
 
-        return pipeline.latest_events
+#         return pipeline.latest_tracks
+
+
+
+#     def get_events(
+#         self,
+#         camera_id
+#     ):
+
+#         pipeline = self.pipelines.get(camera_id)
+
+#         if pipeline is None:
+#             return {}
+
+#         return pipeline.latest_events

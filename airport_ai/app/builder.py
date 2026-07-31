@@ -1,11 +1,11 @@
 from airport_ai.app.application import AirportAIApplication
-from airport_ai.app.services import SharedServices, DashboardService
+from airport_ai.app.services import SharedServices
 from airport_ai.pipeline.camera_pipeline import CameraPipeline
 from airport_ai.config.camera import CameraConfig
 from airport_ai.streams.camera import AsyncCamera
 from airport_ai.analytics.executor import AnalyticsExecutor
 from airport_ai.config import config
-from airport_ai.dashboard.runtime_store import runtime_store
+from airport_ai.dashboard.runtime_store import RuntimeStore # DASHBOARD
 
 class ApplicationBuilder:
     def __init__(self, config):
@@ -15,18 +15,26 @@ class ApplicationBuilder:
         """
         Returns a fully initialized AirportAIApp.
         """
-        services = self.create_services()
-        pipelines = self.create_camera_pipelines(services)
-        dashboard_service = DashboardService(
-            pipelines=pipelines,
-            repository=services.repository
+        services = self.create_services()   # Creates one shared service container
+        runtime_store = RuntimeStore(
+            self.config.resolve_path(
+                self.config.get("dashboard")["runtime_db"]
+            )   # One RuntimeStore instance
         )
-        app_services = {
-            "dashboard": dashboard_service
-        }
+        pipelines = self.create_camera_pipelines(
+            services,
+            runtime_store
+        )   # Most important
+        # dashboard_service = DashboardService(
+        #     pipelines=pipelines,
+        #     repository=services.repository
+        # )
+        # app_services = {
+        #     "dashboard": dashboard_service
+        # }        
         return AirportAIApplication(
             pipelines=pipelines,
-            services=app_services,
+            services=services,
             runtime_store=runtime_store
         )
 
@@ -37,7 +45,7 @@ class ApplicationBuilder:
         from airport_ai.storage.database import Database
         database_config = self.config.get("database")
         database_path = self.config.resolve_path(database_config["path"])
-        database = Database(database_config["path"])
+        database = Database(database_path)
 
         # =================
         # Event Repository
@@ -142,7 +150,7 @@ class ApplicationBuilder:
             profiler=profiler,
         )
     
-    def create_camera_pipelines(self, services):
+    def create_camera_pipelines(self, services, runtime_store):
         pipelines = {}
         camera_configs = [
             CameraConfig(camera) for camera in self.config.get("cameras")
@@ -170,7 +178,7 @@ class ApplicationBuilder:
                 visualizer=services.visualizer,
                 analytics_executor=services.analytics_executor,
                 profiler=services.profiler,
-                runtime_store=runtime_store,
+                runtime_store=runtime_store,    # DASHBOARD
             )
 
             pipelines[camera_config.camera_id] = pipeline

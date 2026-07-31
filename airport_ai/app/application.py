@@ -26,13 +26,14 @@ class AirportAIApplication:
     #     # Dashboard integration later
     #     pass
     
-    def stop(self):
+    def stop(self): # Video stop if EOF
         for pipeline in self.pipelines.values():
             if hasattr(pipeline.camera, "stop"):
                 pipeline.camera.stop()
 
             if hasattr(pipeline.camera, "release"):
                 pipeline.camera.release()
+    
     def shutdown(self):
         for pipeline in self.pipelines.values():
             pipeline.analytics_executor.shutdown()
