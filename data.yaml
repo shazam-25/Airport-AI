@@ -1,6 +1,6 @@
-train: ../train/images
-val: ../valid/images
-test: ../test/images
+train: datasets/airport/train/images
+val: datasets/airport/valid/images
+test: datasets/airport/test/images
 
 nc: 6
 names: ['aircraft', 'airport tug', 'cone', 'ground support equipment', 'safety vest', 'worker']

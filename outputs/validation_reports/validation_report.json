@@ -1,0 +1,8 @@
+{
+    "total_images": 6892,
+    "corrupted_images": 69,
+    "missing_labels": 0,
+    "empty_labels": 0,
+    "invalid_labels": 811,
+    "duplicate_names": 0
+}
